@@ -2,6 +2,7 @@
 
 ## Intro/context
 Decided to try my shot at 2024's Advent of Code, albeit a little late.
+Also a good opportunity for me to add some stuff to my GitHub profile, as I haven't used it much since its creation.
 
 ## Journal/Misc
 - 2025/08/09 : Was going to do it in C++, but I figured it'd be quicker to code in Python.
