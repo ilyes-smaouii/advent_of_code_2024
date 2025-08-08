@@ -1,7 +1,7 @@
 # advent_of_code_2024
 
 ## Intro/context
-Decided to try my shot at 2024's Advent of Code, albeit a little late.
+Decided to try my shot at 2024's Advent of Code, albeit a little late. \
 Also a good opportunity for me to add some stuff to my GitHub profile, as I haven't used it much since its creation.
 
 ## Journal/Misc
