@@ -1,4 +1,4 @@
-# open file, collect content and split into two columns
+# open file, collect content and split rows into cells
 le_filename = "day_02_input.txt"
 le_file = open(le_filename, "r")
 le_lines = le_file.readlines()
