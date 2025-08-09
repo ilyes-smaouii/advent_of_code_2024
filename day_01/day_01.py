@@ -18,7 +18,7 @@ for i in range(len(left_col)) :
 print("Total distance :", total_dist)
 
 ######
-# PART 2 #
+# PART 2
 ######
 
 total_sim = 0
