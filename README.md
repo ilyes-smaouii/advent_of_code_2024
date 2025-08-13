@@ -18,3 +18,8 @@ Instead, I had to use it for each update, every time restricting the set of rule
 It also seems the rules have been made such that, for every update, and using only the rules pertaining to that update,
 the ordering would be total (I'm assuming, anyway, since I got the right answer).\
 I'll clean up the code and move on to Day 6.
+- 2025/08/13 - Currently thinking about part. 2 of Day 6. I already have an algorithm that could work in theory,
+but it just takes too much time to compute, so I'm trying to think of a more efficient one.\
+Update : found one that actually finished in less than like 30 seconds, but it still feels slow.
+Will try finding a more efficient way.\
+Update : leaving it like this for now, I'm spending too much time on this
