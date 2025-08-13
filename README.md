@@ -22,4 +22,4 @@ I'll clean up the code and move on to Day 6.
 but it just takes too much time to compute, so I'm trying to think of a more efficient one.\
 Update : found one that actually finished in less than like 30 seconds, but it still feels slow.
 Will try finding a more efficient way.\
-Update : leaving it like this for now, I'm spending too much time on this
+Update : leaving it like this for now, I'm spending too much time on this. Plus I gotta sleep.
