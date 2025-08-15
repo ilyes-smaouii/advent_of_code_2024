@@ -23,3 +23,4 @@ but it just takes too much time to compute, so I'm trying to think of a more eff
 Update : found one that actually finished in less than like 30 seconds, but it still feels slow.
 Will try finding a more efficient way.\
 Update : leaving it like this for now, I'm spending too much time on this. Plus I gotta sleep.
+- 2025/08/15 - Got a little busy these days with other stuff, so I haven't done much, might have more time this weekend
