@@ -1,3 +1,4 @@
+# Helper stuff
 
 def get_file_content_raw(filename) :
   _file = open(filename, "r")
@@ -26,3 +27,19 @@ def concat_table_as_str(table, func = None) :
   if func == None :
     func = str
   return "".join(func(elem) for elem in table)
+
+def get_log_entry(msg, log_cat = "I") :
+  """
+  Log categories : Result, Info, Debug
+  """
+  log_cat_dict = {
+    "R" : "[RESULT]",
+    "I" : "[INFO]",
+    "D" : "[DEBUG]"
+    }
+  if log_cat not in log_cat_dict :
+    raise Exception("get_log_entry() error : bad log category !")
+  return log_cat_dict[log_cat] + " " + msg
+
+def print_log_entry(msg, log_cat = "I") :
+  print(get_log_entry(msg, log_cat))
