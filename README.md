@@ -29,4 +29,9 @@ Added some stuff in helpers.py, cause why not.
 - 2025/08/18 - Spent a lot of time on day 10 part 1 using a lot of wrapper and helper stuff I've added to helpers.py, but
 I ended up with some pretty unnecessarilty complex code, and the answer was wrong. I tried to ditch the object-oriented, elegant
 approach and rewriting my code to be much simpler, with a more direct approach, but I just ended up with the exact same result.
-At this point, I wonder if I haven't just misread the instructions.
+At this point, I wonder if I haven't just misread the instructions.\
+Update : turns out the iterator class I had constructed for iterating over tables wasn't properly coded, and missed the very first
+cell of the table, which made me miss the correct solution by 2. I found a way to make it work, but for the sake of simplicity,
+the current version of the code doesn't use it anymore.
+Part 2 was pretty easy once I was done with part 1. \
+Finished Day 10 !

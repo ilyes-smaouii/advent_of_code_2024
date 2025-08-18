@@ -91,7 +91,7 @@ class SimpleTableView() :
       raise Exception("SimpleTableView() construction error : unsupported type " + str(type(table)))
     table_check = check_table_type_and_size(self._table_rep)
     if not table_check[0] :
-      print("table_check[1] :\n", table_check[1], sep = "", log_cats = {"D"}) # [debugging]
+      print_log_entries("table_check[1] :\n" + str(table_check[1]), log_cats = {"D"}) # [debugging]
       raise Exception("SimpleTable construction error : table has inconsistent type or size !")
     self._row_count = len(self._table_rep)
     self._col_count = len(self._table_rep[0])
@@ -151,16 +151,18 @@ class SimpleTable(SimpleTableView) :
 
 class SimpleTableViewCursor() :
   def __init__ (self, simple_table_view) :
+    self._pos = (0, -1)
     self._simple_table_view = simple_table_view
-  def __iter__ (self, initial_pos = None) :
-    if initial_pos == None :
-      self._pos = self._simple_table_view.get_pos() 
-    else :
-      self._pos = (0, -1) # starting before 1st row, so __next__ returns first cell at first call
-    self._viewed_cell = None
+  def __iter__ (self) :
+    self._has_started = False
+    self._pos, self._viewed_cell = self._simple_table_view.set_pos((0, 0))
     self._table_size = self._simple_table_view.get_size()
     return self
   def __next__ (self) :
+    if not self._has_started :
+      self._has_started = True
+      self._pos, self._viewed_cell = self._simple_table_view.set_pos((0, 0))
+      return (self._pos, self._viewed_cell)
     # check if we're at the end of the current row
     if self._pos[1] >= self._table_size[1] - 1 :
       # check if we're at the end of the table (i.e. current row is the last row)
@@ -171,5 +173,6 @@ class SimpleTableViewCursor() :
     else :
         self._pos, self._viewed_cell = self._simple_table_view.move_right()
     # return (self._pos, self._simple_table_view.get_cell_at(self._pos))
+    return (self._pos, self._viewed_cell)
     return self._simple_table_view.get_pos_and_cell()
 #
