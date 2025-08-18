@@ -14,13 +14,6 @@ le_input_table = helpers.get_file_content_as_table(le_filename, lambda x : int(x
 # 32019012
 # 01329801
 # 10456732""", int) # [testing]
-# le_input_table = helpers.raw_to_table("""10..9..
-# 2...8..
-# 3...7..
-# 4567654
-# ...8..3
-# ...9..2
-# .....01""", lambda x : int(x) if x != "." else 20) # [testing]
 
 ######
 # PART 1
@@ -36,89 +29,6 @@ helpers.LOG_DICT["FROM_HT"] = (False, "[FROM_HT]")
 # helpers.LOG_DICT["FINAL_TRAILS"] = (False, "[FINAL_TRAILS]")
 helpers.LOG_DICT["TRAILHEADS"] = (False, "[TRAILHEADS]")
 helpers.LOG_DICT["DIRECT"] = (False, "[DIRECT]")
-
-# def find_trailheads(simple_table_view) :
-#   trailheads = set()
-#   for cell_pos, cell in helpers.SimpleTableViewCursor(simple_table_view) :
-#     if True :
-#       helpers.print_log_entries("find_trailheads() - cell_pos : " + str(cell_pos), log_cats = {"D"}) # [debugging]
-#       helpers.print_log_entries("find_trailheads() - cell  : " + str(cell) + " of type " + str(type(cell))\
-#         , log_cats = {"D"}) # [debugging]
-#     if cell == 0 :
-#       trailheads.add(cell_pos)
-#   return trailheads
-
-# le_simple_table = helpers.SimpleTableView(le_input_table)
-# # le_simple_table = helpers.SimpleTableView([[1, 2, 0]])
-# le_trailheads = find_trailheads(helpers.SimpleTableView(le_simple_table))
-# helpers.print_log_entries("find_trailheads result :", str(le_trailheads), log_cats = {"T", "TRAILHEADS"}) # [testing]
-
-# def get_neighboring_cells_set(simple_table_view, pos) :
-#   helpers.print_log_entries("get_neighboring_cells_set() - got called with argument pos = " + str(pos), log_cats = {"D"})
-#   neighboring_cells_set = set()
-#   helpers.print_log_entries("get_neighboring_cells_set() - initializing by calling set_pos() with argument " + str(pos), log_cats = {"D"})
-#   actual_new_pos, actual_new_cell = simple_table_view.set_pos(pos)
-#   if actual_new_pos != pos :
-#     raise Exception("get_neighboring_cells_set() error invalid position (expected " + str(pos) + ", got " + \
-#       str(actual_new_pos) + ")")
-#   st1 = helpers.SimpleTableView(simple_table_view, actual_new_pos)
-#   st2 = helpers.SimpleTableView(simple_table_view, actual_new_pos)
-#   st3 = helpers.SimpleTableView(simple_table_view, actual_new_pos)
-#   st4 = helpers.SimpleTableView(simple_table_view, actual_new_pos)
-#   st1.move_up()
-#   st2.move_down()
-#   st3.move_left()
-#   st4.move_right()
-#   helpers.print_log_entries("get_neighboring_cells_set() - will update with set :", \
-#     str({st1.get_pos_and_cell(), st2.get_pos_and_cell(), st3.get_pos_and_cell(), st4.get_pos_and_cell()}), log_cats = {"NEXT_CELLS"})
-#   neighboring_cells_set.update({st1.get_pos_and_cell(), st2.get_pos_and_cell(), st3.get_pos_and_cell(), st4.get_pos_and_cell()})
-#   if (actual_new_pos, actual_new_cell) in neighboring_cells_set :
-#     neighboring_cells_set.remove((actual_new_pos, actual_new_cell))
-#   return neighboring_cells_set
-
-# static_count = 0
-
-# def explore_trails_from_trailhead(simple_table_view, trailhead_pos, curr_num = 0, curr_trail = []) :
-#   global static_count
-#   trailtails_set = set()
-#   final_count = 0
-#   curr_pos_and_cell = (trailhead_pos, simple_table_view.get_cell_at(trailhead_pos))
-#   helpers.print_log_entries("explore_trails_from_trailhead() :", "trailhead_pos = " + str(trailhead_pos) + ", curr_trail = " + str(curr_trail), "\n", log_cats = {"TRAILS"})
-#   if curr_pos_and_cell[1] == curr_num :
-#     curr_trail = copy.deepcopy(curr_trail) + [curr_pos_and_cell]
-#     if curr_num == 9 :
-#       # print("found one", "curr_pos_and_cell = ", curr_pos_and_cell)
-#       # print("returning (1, ", curr_pos_and_cell[0], ")", sep ="")
-#       static_count += 1
-#       helpers.print_log_entries("final_trail :", curr_trail, log_cats={"FINAL_TRAILS"})
-#       return (1, {curr_pos_and_cell[0]})
-#     else :
-#       # helpers.print_log_entries("explore_trails_from_trailhead() - calling get_neighboring_cells_set() with argument "\
-#       #                           "trailhead_pos = " + str(trailhead_pos), log_cats = {"D"})
-#       neighboring_cells_set = get_neighboring_cells_set(simple_table_view, trailhead_pos)
-#       helpers.print_log_entries("explore_trails_from_trailhead() - got neighboring_cells_set = " + str(neighboring_cells_set)\
-#         , "from cell : " + str(curr_pos_and_cell), log_cats = {"NEXT_CELLS"})
-#       for cell in neighboring_cells_set :
-#         to_add = explore_trails_from_trailhead(simple_table_view, cell[0], curr_num + 1, curr_trail)
-#         helpers.print_log_entries("found " + str(to_add) + " good trails for curr_num = "\
-#           + str(curr_num), log_cats = {"CHECK_TRAILS"})
-#         trailtails_set.update(to_add[1])
-#         final_count += to_add[0]
-#   else :
-#     helpers.print_log_entries("cell not good for curr_num = " + str(curr_num) \
-#       + ", cell_content =  " + str(curr_pos_and_cell[1]), "curr_trail = " + str(curr_trail), log_cats = {"TRAILS"})
-#   return (len(trailtails_set), trailtails_set)
-
-# def count_trails(simple_table_view, trailheads_positions) :
-#   final_count = 0
-#   for trailhead_pos in trailheads_positions :
-#     explored = explore_trails_from_trailhead(simple_table_view, trailhead_pos)
-#     helpers.print_log_entries("explored from : " + str(trailhead_pos), "to : " + str(explored), log_cats={"CHECK_TRAILS", "FROM_HT"})
-#     final_count += explored[0]
-#   return final_count
-
-# helpers.print_log_entries("count_trails result : ", count_trails(le_simple_table, le_trailheads), log_cats = {"R"})
-# helpers.print_log_entries("static_count result : ", static_count, log_cats = {"R"})
 
 ######
 # PART 1 - More direct approach
