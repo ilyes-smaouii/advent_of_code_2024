@@ -24,3 +24,9 @@ Update : found one that actually finished in less than like 30 seconds, but it s
 Will try finding a more efficient way.\
 Update : leaving it like this for now, I'm spending too much time on this. Plus I gotta sleep.
 - 2025/08/15 - Got a little busy these days with other stuff, so I haven't done much, might have more time this weekend
+- 2025/08/17 - Finished day 9.\
+Added some stuff in helpers.py, cause why not.
+- 2025/08/18 - Spent a lot of time on day 10 part 1 using a lot of wrapper and helper stuff I've added to helpers.py, but
+I ended up with some pretty unnecessarilty complex code, and the answer was wrong. I tried to ditch the object-oriented, elegant
+approach and rewriting my code to be much simpler, with a more direct approach, but I just ended up with the exact same result.
+At this point, I wonder if I haven't just misread the instructions.
