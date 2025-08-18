@@ -34,4 +34,6 @@ Update : turns out the iterator class I had constructed for iterating over table
 cell of the table, which made me miss the correct solution by 2. I found a way to make it work, but for the sake of simplicity,
 the current version of the code doesn't use it anymore.
 Part 2 was pretty easy once I was done with part 1. \
-Finished Day 10 !
+Finished Day 10 ! \
+Update : finished Day 11 too ! Turns out part 2 was pretty simple. I just changed the mechanics a bit and replaced the use of lists
+with the use of sets, and the program ran much - much - faster.
