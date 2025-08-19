@@ -37,3 +37,7 @@ Part 2 was pretty easy once I was done with part 1. \
 Finished Day 10 ! \
 Update : finished Day 11 too ! Turns out part 2 was pretty simple. I just changed the mechanics a bit and replaced the use of lists
 with the use of sets, and the program ran much - much - faster.
+- 2025/08/20 - Currently stuck on day 12 part 2. My algorithm works by counting corners, but I realized it doesn't account for 
+"inwards" corners, and I can't figure out a simple way to account for them.\
+Update : figured it out, and it took 7 additional lines of code, which accounted for close to half of the corresponding function,
+but was still less than I feared it would be. Moving on to Day 13.

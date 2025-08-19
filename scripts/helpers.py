@@ -3,8 +3,8 @@ import copy
 # Helper stuff
 
 LOG_DICT = {
-  "D" : tuple([True, "[DEBUG]"]),
-  "T" : tuple([True, "[TESTING]"]),
+  "D" : tuple([False, "[DEBUG]"]),
+  "T" : tuple([False, "[TESTING]"]),
   "I" : tuple([True, "[INFO]"]),
   "R" : tuple([True, "[RESULTS]"]),
   }
@@ -47,13 +47,14 @@ def get_log_entries(*to_print, log_cats = {"I"}) :
   Log categories : Result, Info, Debug
   """
   should_log = False
+  prefix = ""
   for log_cat in log_cats :
     if log_cat in LOG_DICT and LOG_DICT[log_cat][0] :
       should_log = True
-      break
+      prefix += LOG_DICT[log_cat][1]
   # print("get_log_entries() - to_print : ", to_print) # [debugging]
   if should_log :
-    return [LOG_DICT[log_cat][1] + " " + str(_str) for _str in to_print]
+    return [prefix + " " + str(_str) for _str in to_print]
   else :
     return []
 
@@ -62,6 +63,9 @@ def print_log_entries(*to_print, log_cats = {"I"}) :
   # print("log_entries : ", log_entries) # [debugging]
   for log_entry in log_entries :
     print(log_entry)
+
+def eval_and_print(expr, log_cats = {"I"}) :
+  print_log_entries(expr, eval(expr), log_cats)
 
 def check_table_type_and_size(table) :
   if not type(table) is list :
