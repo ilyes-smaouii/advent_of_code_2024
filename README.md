@@ -40,4 +40,12 @@ with the use of sets, and the program ran much - much - faster.
 - 2025/08/20 - Currently stuck on day 12 part 2. My algorithm works by counting corners, but I realized it doesn't account for 
 "inwards" corners, and I can't figure out a simple way to account for them.\
 Update : figured it out, and it took 7 additional lines of code, which accounted for close to half of the corresponding function,
-but was still less than I feared it would be. Moving on to Day 13.
+but was still less than I feared it would be. Moving on to Day 13.\
+Update : just read the instructions for part 1 of Day 13. At first glance, this feels somewhat simple but also like it could take\
+quite a bit of code to achieve it. First step is parsing the input, which is I don't like thinking about too much.\
+Update : realized halfway through part 2 of day 13 that there's not such thing as a "mininmum cost" unless the coefficients for A\
+and B happen to be exactly proportional. Just did a quick test, and this doesn't happen for any machine in the input. Don't know if
+I should incorporate this assumption in my code, or make it as agnostic to input.\
+Update : made the code agnostic (in theory, anyway), and finally managed to solve Day 13. Won't look at Day 14's instructions
+for now, because if I do, I might not be able to move on to something else until I've solved it. I had other things to do today
+which I didn't do because I got too busy with this.
