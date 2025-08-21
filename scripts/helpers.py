@@ -26,6 +26,14 @@ def raw_to_table(raw_content, cell_transformation_func = None) :
     _char_table.append([cell_transformation_func(char) for char in _line])
   return _char_table
 
+def raw_to_lines(raw_content, line_transformation_func = None) :
+  _lines = []
+  if line_transformation_func == None :
+    line_transformation_func = id_func
+  for _line in raw_content.split("\n") :
+    _lines.append(line_transformation_func(_line))
+  return _lines
+
 def get_file_content_as_lines(filename, line_transformation_func = None) :
   if line_transformation_func == None :
     line_transformation_func = id_func
