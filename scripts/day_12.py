@@ -79,7 +79,9 @@ def get_area_from_cell_v2(table, cell_pos, area_color = None) :
   if area_color is None :
     area_color = table[row_idx][col_idx]
   final_area = set()
-  next_layer = {(cell_pos)}
+  next_layer = set()
+  if area_color == table[cell_pos[0]][cell_pos[1]] :
+    next_layer.add(cell_pos)
   while len(next_layer) > 0 :
     final_area.update(next_layer)
     temp_next_layer = set()

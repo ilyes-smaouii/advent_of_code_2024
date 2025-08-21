@@ -17,10 +17,23 @@ def get_file_content_raw(filename) :
 def id_func(arg) :
   return arg
 
-def raw_to_table(raw_content, cell_transformation_func = None) :
-  _lines = raw_content.split("\n")
+def table_to_raw(table, line_transformation_func = None, cell_transformation_func = None) :
+  if line_transformation_func == None :
+    line_transformation_func = id_func
   if cell_transformation_func == None :
     cell_transformation_func = id_func
+  final_str = ""
+  for line in table :
+    line_str = ""
+    for cell in line :
+      line_str += str(cell_transformation_func(cell))
+    final_str += line_transformation_func(line_str) + "\n"
+  return final_str
+
+def raw_to_table(raw_content, cell_transformation_func = None) :
+  if cell_transformation_func == None :
+    cell_transformation_func = id_func
+  _lines = raw_content.split("\n")
   _char_table = []
   for _line in _lines :
     _char_table.append([cell_transformation_func(char) for char in _line])

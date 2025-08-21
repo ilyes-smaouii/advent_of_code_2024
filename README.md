@@ -59,4 +59,8 @@ for now, because if I do, I might not be able to move on to something else until
 which I didn't do because I got too busy with this.\
 ### 2025/08/21
 Finished Day 14, which turned out easier than I expected - especially part 2, although the approach was a bit unorthodox.
-Even had to change the font size for my shell.
+Even had to change the font size for my shell.\
+Update : after some discussions with friends who have already attempted AoC, I've confirmed what I was starting to suspect : unlike
+what I initially thought, AoC exercises aren't gonna be the type I can solve in just one hour. In fact, I've spend several hours on
+each of them almost every time, for the past several days. Considering this was kind of meant as a side quest, I might decide to
+slow down a little for the coming days, so I can free some time for other stuff I have to do.
