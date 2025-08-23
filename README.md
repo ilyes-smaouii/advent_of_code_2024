@@ -82,4 +82,8 @@ Unless, by a miracle, it works on the first try - I haven't done a single test u
 Update : couldn't resist, and spent some time trying to correct my - unsurprisingly - not working code.\
 New update : I actually got it to work ?? I'd never even tried to implement A-star before, I actually expected it would take longer
 to get it to work. The fix I fould should not have changed the result, though, so I'll try to investigate where I've made a mistake
-before moving on to part 2.
+before moving on to part 2.\
+Update : turns out I misimplemented the A-star algorithm. Not sure why it still worked in specific conditions, but anyway.\
+\
+Update : got the solution to part 2 of Day 16 after a lot of trial-and-error, but the resulting code is really messy. Might
+try to clean it up. (or just move on straight to Day 17 ?)
