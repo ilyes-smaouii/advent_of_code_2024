@@ -74,3 +74,12 @@ Update : after some discussions with friends who have already attempted AoC, I'v
 what I initially thought, AoC exercises aren't gonna be the type I can solve in just one hour. In fact, I've spend several hours on
 each of them almost every time, for the past several days. Considering this was kind of meant as a side quest, I might decide to
 slow down a little for the coming days, so I can free some time for other stuff I have to do.
+### 2025/08/23
+Finished Day 15 one or two days ago.
+Currently wrote some code based the A-star algorithm to find the shortest path for part 1, but I haven't tested it yet.
+Unless, by a miracle, it works on the first try - I haven't done a single test until now -
+, I might just take another break - again, I've got things to do - and finish later.\
+Update : couldn't resist, and spent some time trying to correct my - unsurprisingly - not working code.\
+New update : I actually got it to work ?? I'd never even tried to implement A-star before, I actually expected it would take longer
+to get it to work. The fix I fould should not have changed the result, though, so I'll try to investigate where I've made a mistake
+before moving on to part 2.

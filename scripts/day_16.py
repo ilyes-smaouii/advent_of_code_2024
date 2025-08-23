@@ -1,7 +1,7 @@
 import helpers
 
 # open file, collect content
-le_filename = "../inputs/day_XX_input.txt"
+le_filename = "../inputs/day_16_input.txt"
 le_file_content = helpers.get_file_content_raw(le_filename)
 le_lines = helpers.get_file_content_as_lines(le_filename)
 le_char_table = helpers.get_file_content_as_table(le_filename)
@@ -66,6 +66,7 @@ def find_start_and_end(char_table) :
         end_pos = (row_idx, col_idx)
         found_end = True
       if found_start and found_end :
+        # helpers.print_log_entries("start_pos_dir, end_pos :", "{}, {}".format(start_pos_dir, end_pos), log_cats = {"D"})
         return start_pos_dir, end_pos
   return start_pos_dir, end_pos
 
@@ -86,7 +87,21 @@ def estimate_remaining_cost_to_goal(start_pos_dir, end_pos) :
   if start_dir_x * diff_x + start_dir_y * diff_y > 0 :
     turn_count -= 1
   final_cost += turn_count * TURN_COST
-  return final_cost
+  return 0
+
+def count_turns(dir_1, dir_2) :
+  dir_1_x, dir_1_y = dir_1
+  dir_2_x, dir_2_y = dir_2
+  if dir_1_x != 0 :
+    if dir_2_y != 0 :
+      return 1
+    else :
+      return abs(dir_1_x - dir_2_x)
+  else :
+    if dir_2_x != 0 :
+      return 1
+    else :
+      return abs(dir_1_y - dir_2_y)
 
 def get_neighbors(char_table, pos_dir) :
   """
@@ -99,40 +114,70 @@ def get_neighbors(char_table, pos_dir) :
   if char_table[next_pos_x][next_pos_y] in TRAVERSABLE_CELLS :
     # cost to move to neighbor in current direction
     final_neighbors[((next_pos_x, next_pos_y), (dir_x, dir_y))] = MOVE_COST
-  for dir in ALL_DIRECTIONS.difference((dir_x, dir_y)) :
-    # cost to turn 
-    final_neighbors[((pos_x, pos_y), dir)] = TURN_COST
+  turn_right = (+dir_y, -dir_x)
+  turn_left = (-dir_y, +dir_x)
+  final_neighbors[((pos_x, pos_y), turn_right)] = TURN_COST
+  final_neighbors[((pos_x, pos_y), turn_left)] = TURN_COST
+  # final_neighbors[((pos_x, pos_y), (-dir_x, dir_y))] = 2*TURN_COST
+  # for new_dir in ALL_DIRECTIONS.difference((dir_x, dir_y)) :
+  #   # cost to turn 
+  #   final_neighbors[((pos_x, pos_y), new_dir)] = count_turns(new_dir, (dir_x, dir_y)) * TURN_COST
   return final_neighbors
 
 def find_shortest_path_aux(char_table) :
   start_pos_dir, end_pos = find_start_and_end(char_table)
   # (pos_dir, cost_from_start, estimate_cost_to_goal, previous_cell)
   open_dict = {
-    start_pos_dir : (0, estimate_remaining_cost_to_goal(start_pos_dir, end_pos), START_PREV)
+    start_pos_dir : {"dist_start" : 0, "est_end" : estimate_remaining_cost_to_goal(start_pos_dir, end_pos), "prev" : START_PREV}
     }
   closed_dict = dict()
-  end_reached = True
+  end_reached = False
+  # helpers.print_log_entries("open_dict : {}".format(open_dict), log_cats = {"D"})
+  # helpers.print_log_entries("len(open_dict) : {}".format(len(open_dict)), log_cats = {"D"})
   while len(open_dict) > 0 and not end_reached :
-    some_candidate = open_dict.values()[0]
-    cost_estimate = some_candidate[0] + some_candidate[1]
+    some_candidate_metadata = next(iter(open_dict.values()))
+    # helpers.print_log_entries("some_candidate_metadata : {}".format(some_candidate_metadata), log_cats = {"D"})
+    cost_estimate = some_candidate_metadata["dist_start"] + some_candidate_metadata["est_end"]
     chosen_candidate_pos_dir = None
-    for candidate_pos_dir, candidate_metadata in open_dict :
-      if candidate_metadata[0] + candidate_metadata[1] < cost_estimate :
+    for candidate_pos_dir, candidate_metadata in open_dict.items() :
+      if candidate_metadata["dist_start"] + candidate_metadata["est_end"] <= cost_estimate :
+        cost_estimate = candidate_metadata["dist_start"] + candidate_metadata["est_end"]
         chosen_candidate_pos_dir = candidate_pos_dir
+    # helpers.print_log_entries("find_shortest_path_aux() - chosen_candidate_pos_dir"\
+    #   " : {}".format(chosen_candidate_pos_dir), log_cats = {"D"})
     if chosen_candidate_pos_dir[0] == end_pos :
       end_reached = True
       closed_dict[chosen_candidate_pos_dir] = open_dict[chosen_candidate_pos_dir]
       open_dict.pop(chosen_candidate_pos_dir)
     else :
-      for neighbor_pos_dir, cost_to_neighbor in get_neighbors(char_table, chosen_candidate_pos_dir).items() :
-        open_dict[neighbor_pos_dir] = (open_dict[chosen_candidate_pos_dir][0] + cost_to_neighbor,\
-          estimate_remaining_cost_to_goal(neighbor_pos_dir, end_pos), chosen_candidate_pos_dir)
+      for neighbor_pos_dir, distance_to_neighbor in get_neighbors(char_table, chosen_candidate_pos_dir).items() :
+        if neighbor_pos_dir not in closed_dict :
+          cost_to_neighbor = open_dict[chosen_candidate_pos_dir]["dist_start"] + distance_to_neighbor
+          neighor_estimate_to_goal = estimate_remaining_cost_to_goal(neighbor_pos_dir, end_pos)
+          open_dict[neighbor_pos_dir] = {"dist_start" : cost_to_neighbor, "est_end" : neighor_estimate_to_goal, "prev" : chosen_candidate_pos_dir}
       closed_dict[chosen_candidate_pos_dir] = open_dict[chosen_candidate_pos_dir]
       open_dict.pop(chosen_candidate_pos_dir)
+    # helpers.print_log_entries("closed_dict.keys() : {}".format(closed_dict.keys()), log_cats = {"D"})
+    # helpers.print_log_entries("closed_dict : {}".format(closed_dict), log_cats = {"D"})
+  helpers.print_log_entries("len(closed_dict) : {}".format(len(closed_dict)), log_cats = {"D"})
   return closed_dict
 
-# def find_sortest_path(char_table) :
-#   closed_dict = find_shortest_path_aux(char_table)
+def find_sortest_path(char_table) :
+  start_pos, end_pos = find_start_and_end(char_table)
+  closed_dict = find_shortest_path_aux(char_table)
+  for pos_dir in closed_dict :
+    if pos_dir[0] == end_pos :
+      return closed_dict[pos_dir]
+
+helpers.LOG_DICT["T"] = [True, "[TESTING]"]
+helpers.LOG_DICT["D"] = [True, "[DEBUG]"]
+
+# helpers.print_log_entries(find_shortest_path_aux(le_char_table), log_cats = {"T"})
+for dir1 in ALL_DIRECTIONS :
+  for dir2 in ALL_DIRECTIONS :
+    helpers.print_log_entries("count_turns({}, {}) : {}".format(dir1, dir2, count_turns(dir1, dir2)), log_cats = {"T"})
+#
+helpers.print_log_entries(find_sortest_path(le_char_table), log_cats = {"T"})
 
 ######
 # PART 2
