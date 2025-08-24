@@ -301,23 +301,63 @@ def out_to_reg_A(_out) :
     res |= next_octet
   return res
 
-# some_test_A_value = 100000
+def out_to_reg_A(_out) :
+  res = 0
+  print("_out : {}".format(_out))
+  for _out_idx in range(len(_out) - 1, -1, -1) :
+    elem = _out[_out_idx]
+    found = False
+    for i in range(8) :
+      temp_res = (res << 3) | i
+      curr_word = i ^ 3
+      _b = (curr_word) ^ (temp_res >> curr_word)
+      _b ^= 3
+      if (_b & 7) == elem :
+        res = temp_res
+        found = True
+        break
+    if not found :
+      raise Exception("Didn't find i !\n(res = {}, _out_idx = {}, elem = {})"\
+        .format(octet_decompose(res), _out_idx, elem))
+  return res
+
+def out_to_reg_A_aux(_out, _last_out_idx, last_res = 0) :
+  res = last_res
+  res_set = set()
+  for _out_idx in range(_last_out_idx - 1, -1, -1) :
+    elem = _out[_out_idx]
+    found = False
+    for i in range(8) :
+      temp_res = (res << 3) | i
+      curr_word = i ^ 3
+      _b = (curr_word) ^ (temp_res >> curr_word)
+      _b ^= 3
+      if (_b & 7) == elem :
+        res = temp_res
+        if _out_idx == 0 :
+          res_set.add(temp_res)
+        else :
+          res_set |= out_to_reg_A_aux(_out, _out_idx, res)
+  return res_set
+
+some_test_A_value = 81800
 
 load_machine(le_file_content)
-# le_reg_A = some_test_A_value
+le_reg_A = some_test_A_value
 print("reg_A :\n{}\n{}\nrun2() and run() have results :".format(le_reg_A, octet_decompose(le_reg_A)))
 run2_and_display_res()
 load_machine(le_file_content)
-# le_reg_A = some_test_A_value
+le_reg_A = some_test_A_value
 run_and_display_res()
 
 print("Reversal function on output (dec then octet representations) :")
-le_res_p2 = out_to_reg_A(le_out)
+# le_res_p2 = out_to_reg_A(le_out)
+le_res_p2 = out_to_reg_A_aux(le_out, len(le_out) - 1)
 print(le_res_p2)
-print(octet_decompose(le_res_p2))
+# print(octet_decompose(le_res_p2))
 
 
-print("Re-running machine on findings :")
-load_machine(le_file_content)
-le_reg_A = le_res_p2
-run2_and_display_res()
+# print("Re-running machine on findings :")
+# load_machine(le_file_content)
+# le_reg_A = le_res_p2
+# run2_and_display_res()
