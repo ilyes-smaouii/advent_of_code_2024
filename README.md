@@ -87,3 +87,12 @@ Update : turns out I misimplemented the A-star algorithm. Not sure why it still 
 \
 Update : got the solution to part 2 of Day 16 after a lot of trial-and-error, but the resulting code is really messy. Might
 try to clean it up. (or just move on straight to Day 17 ?)
+### 2025/08/24
+Cleaned up Day 16, finished part 1 of Day 17, which felt pretty simple.\
+Tried brute-force approach for part 2, but it doesn't seem to work (still running as I write this, currently at
+iteration n°14600000).\
+While it's still running I'll try to disassemble the program and understand what it does. This is actually my favorite type of problems -
+open problem, simple description -, so I'm not complaining - not yet, anyway, though that might change if it turns out too complex.\
+\
+Update : figured out the disassembled code and put it in a function. Now I need to figure the function that can reverse that process, i.e.
+take some "out" as input, and give me the corresponding initial value for register A .
