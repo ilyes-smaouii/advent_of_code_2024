@@ -96,3 +96,9 @@ open problem, simple description -, so I'm not complaining - not yet, anyway, th
 \
 Update : figured out the disassembled code and put it in a function. Now I need to figure the function that can reverse that process, i.e.
 take some "out" as input, and give me the corresponding initial value for register A .
+### 2025/08/25
+Finally figured out Day 17. I was on the right track, but I needed to tweak a few things, and correct some small - though impactful - mistakes.
+While the final "core" code is less than 20 lines long, it required very precise handling of the variables,
+and the different steps of the algorithms, along with awareness of a few subtle technicalities. The main idea's always been the same, but
+it took me a lot of time to get it exactly right.\
+Anyway, moving on.
