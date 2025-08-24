@@ -71,22 +71,6 @@ DIR_CHARS = {
   (0, +1) : ">",
 }
 
-# def get_nodes_set(char_table) :
-#   nodes_set = set()
-#   start_pos = NO_POS
-#   for row_idx in range(len(char_table)) :
-#     for col_idx in range(len(char_table)) :
-#       curr_cell = char_table[row_idx][col_idx]
-#       if curr_cell == WALL_CHAR :
-#         continue
-#       elif curr_cell == EMPTY_CHAR :
-#         nodes_set.add(((row_idx, col_idx), (-1, 0)))
-#         nodes_set.add(((row_idx, col_idx), (+1, 0)))
-#         nodes_set.add(((row_idx, col_idx), (0, -1)))
-#         nodes_set.add(((row_idx, col_idx), (0, +1)))
-#       elif curr_cell
-#   pass
-
 def find_start_and_end(char_table) :
   """
   Find and return starting and ending positions
@@ -157,26 +141,19 @@ def get_neighbors(char_table, pos_dir) :
   turn_twice = (-dir_x, -dir_y)
   final_neighbors[((pos_x, pos_y), turn_right)] = TURN_COST
   final_neighbors[((pos_x, pos_y), turn_left)] = TURN_COST
-  final_neighbors[((pos_x, pos_y), turn_twice)] = 2*TURN_COST + 13
-  # final_neighbors[((pos_x, pos_y), (-dir_x, -dir_y))] = 2*TURN_COST
-  # for new_dir in ALL_DIRECTIONS.difference((dir_x, dir_y)) :
-  #   # cost to turn 
-  #   final_neighbors[((pos_x, pos_y), new_dir)] = count_turns(new_dir, (dir_x, dir_y)) * TURN_COST
+  final_neighbors[((pos_x, pos_y), turn_twice)] = 2 * TURN_COST
   return final_neighbors
 
 def find_shortest_path_aux(char_table) :
   start_pos_dir, end_pos = find_start_and_end(char_table)
-  # (pos_dir, cost_from_start, estimate_cost_to_goal, previous_cell)
+  # Value format : (pos_dir, cost_from_start, estimate_cost_to_goal, previous_cell)
   open_dict = {
     start_pos_dir : {"dist_start" : 0, "est_end" : estimate_remaining_cost_to_goal(start_pos_dir, end_pos), "prev" : []}
     }
   closed_dict = dict()
   end_reached = False
-  # helpers.print_log_entries("open_dict : {}".format(open_dict), log_cats = {"D"})
-  # helpers.print_log_entries("len(open_dict) : {}".format(len(open_dict)), log_cats = {"D"})
   while len(open_dict) > 0 and not end_reached :
     some_candidate_metadata = next(iter(open_dict.values()))
-    # helpers.print_log_entries("some_candidate_metadata : {}".format(some_candidate_metadata), log_cats = {"D"})
     cost_estimate = some_candidate_metadata["dist_start"] + some_candidate_metadata["est_end"]
     chosen_candidate_pos_dir = None
     for candidate_pos_dir, candidate_metadata in open_dict.items() :
@@ -185,8 +162,6 @@ def find_shortest_path_aux(char_table) :
         chosen_candidate_pos_dir = candidate_pos_dir
     # helpers.print_log_entries("find_shortest_path_aux() - chosen_candidate_pos_dir"\
     #   " : {}".format(chosen_candidate_pos_dir), log_cats = {"D"})
-    # helpers.print_log_entries("find_shortest_path_aux() - cost_estimate"\
-    #   " : {}".format(cost_estimate), log_cats = {"D"})
     if chosen_candidate_pos_dir[0] == end_pos :
       end_reached = True
       closed_dict[chosen_candidate_pos_dir] = open_dict[chosen_candidate_pos_dir]
@@ -210,11 +185,11 @@ def find_shortest_path_aux(char_table) :
   helpers.print_log_entries("len(closed_dict) : {}".format(len(closed_dict)), log_cats = {"D"})
   return closed_dict
 
-def display_path(char_table, path) :
+def highlight_path_str(char_table, path) :
   table_copy = copy.deepcopy(char_table)
   for ((pos_x, pos_y), dir) in path :
     table_copy[pos_x][pos_y] = DIR_CHARS[dir]
-  print(helpers.table_to_raw(table_copy))
+  return helpers.table_to_raw(table_copy)
 
 def find_sortest_path(char_table) :
   start_pos, end_pos = find_start_and_end(char_table)
@@ -223,66 +198,49 @@ def find_sortest_path(char_table) :
     if pos_dir[0] == end_pos :
       helpers.print_log_entries("path length : {}".format(len(closed_dict[pos_dir]["prev"])), log_cats = {"D"})
       le_path = closed_dict[pos_dir]["prev"]
-      display_path(char_table, le_path)
+      map_with_highlight_str = highlight_path_str(char_table, le_path)
+      helpers.print_log_entries("\n" + map_with_highlight_str, log_cats = {"TILES_VIZ"})
       # helpers.print_log_entries("Path : {}".format(closed_dict[pos_dir]["prev"]), log_cats = {"FP"})
       path_str = "\n".join(str(elem) for elem in closed_dict[pos_dir]["prev"])
       helpers.print_log_entries("Path : {}".format(path_str), log_cats = {"FP"})
       return closed_dict[pos_dir]["dist_start"]
 
 helpers.LOG_DICT["T"] = [True, "[TESTING]"]
-helpers.LOG_DICT["D"] = [True, "[DEBUG]"]
+helpers.LOG_DICT["D"] = [False, "[DEBUG]"]
 helpers.LOG_DICT["FP"] = [False, "[FULL_PATH]"]
 
-# helpers.print_log_entries(find_shortest_path_aux(le_char_table), log_cats = {"T"})
-# for dir1 in ALL_DIRECTIONS :
-#   for dir2 in ALL_DIRECTIONS :
-#     helpers.print_log_entries("count_turns({}, {}) : {}".format(dir1, dir2, count_turns(dir1, dir2)), log_cats = {"T"})
-#
 # helpers.print_log_entries(find_sortest_path(le_test_table), log_cats = {"T"})
 # helpers.print_log_entries(find_sortest_path(le_test_table_2), log_cats = {"T"})
-# helpers.print_log_entries(find_sortest_path(le_char_table), log_cats = {"R"})
+helpers.print_log_entries("Shortest path : {}".format(find_sortest_path(le_char_table)), log_cats = {"R"})
 
 ######
 # PART 2
 ######
 
-def find_shortest_paths_aux(char_table) :
+def find_tiles_on_shortest_paths_aux(char_table) :
   start_pos_dir, end_pos = find_start_and_end(char_table)
   # (pos_dir, cost_from_start, estimate_cost_to_goal, previous_cell)
-  shortest_found = -1
-  found_paths = []
+  min_dist_to_goal = -1
   open_dict = {
     start_pos_dir : {"dist_start" : 0, "est_end" : estimate_remaining_cost_to_goal(start_pos_dir, end_pos), "prev" : set()}
     }
   closed_dict = dict()
-  # helpers.print_log_entries("open_dict : {}".format(open_dict), log_cats = {"D"})
-  # helpers.print_log_entries("len(open_dict) : {}".format(len(open_dict)), log_cats = {"D"})
-  finished_exploration = False
-  while len(open_dict) > 0 and not finished_exploration :
-    # if ((9, 3), (-1, 0)) in closed_dict :
-    #   helpers.print_log_entries("closed_dict[((9, 3), (-1, 0))] : {}".format(closed_dict[((9, 3), (-1, 0))]), log_cats = {"D"})
-    if ((9, 3), (-1, 0)) in open_dict :
-      helpers.print_log_entries("open_dict[((9, 3), (-1, 0))] : {}".format(open_dict[((9, 3), (-1, 0))]), log_cats = {"D"})
+  while len(open_dict) > 0 :
     some_candidate_metadata = next(iter(open_dict.values()))
-    # helpers.print_log_entries("some_candidate_metadata : {}".format(some_candidate_metadata), log_cats = {"D"})
     cost_estimate = some_candidate_metadata["dist_start"] + some_candidate_metadata["est_end"]
     chosen_candidate_pos_dir = None
     for candidate_pos_dir, candidate_metadata in open_dict.items() :
       if candidate_metadata["dist_start"] + candidate_metadata["est_end"] <= cost_estimate :
         cost_estimate = candidate_metadata["dist_start"] + candidate_metadata["est_end"]
         chosen_candidate_pos_dir = candidate_pos_dir
-    # helpers.print_log_entries("find_shortest_path_aux() - chosen_candidate_pos_dir"\
-    #   " : {}".format(chosen_candidate_pos_dir), log_cats = {"D"})
-    # helpers.print_log_entries("find_shortest_path_aux() - cost_estimate"\
-    #   " : {}".format(cost_estimate), log_cats = {"D"})
+    if min_dist_to_goal != -1 and cost_estimate > min_dist_to_goal :
+      break
+    #
+    # if we reached end tile, update min_dist_to_goal
     if chosen_candidate_pos_dir[0] == end_pos :
-      closed_dict[chosen_candidate_pos_dir] = open_dict[chosen_candidate_pos_dir]
-      if shortest_found == -1 or shortest_found >= open_dict[chosen_candidate_pos_dir]["dist_start"] :
-        shortest_found = open_dict[chosen_candidate_pos_dir]["dist_start"]
-        found_paths.append(open_dict[chosen_candidate_pos_dir]["prev"])
-      elif shortest_found < open_dict[chosen_candidate_pos_dir]["dist_start"] :
-        finished_exploration = True
-      open_dict.pop(chosen_candidate_pos_dir)
+      if min_dist_to_goal == -1 :
+        min_dist_to_goal = open_dict[chosen_candidate_pos_dir]["dist_start"]
+    # otherwise, update neighbors
     else :
       for neighbor_pos_dir, distance_to_neighbor in get_neighbors(char_table, chosen_candidate_pos_dir).items() :
         if neighbor_pos_dir in closed_dict :
@@ -290,6 +248,7 @@ def find_shortest_paths_aux(char_table) :
         else :
           new_dist_start = open_dict[chosen_candidate_pos_dir]["dist_start"] + distance_to_neighbor
           neighor_estimate_to_goal = estimate_remaining_cost_to_goal(neighbor_pos_dir, end_pos)
+          #
           if neighbor_pos_dir not in open_dict :
             open_dict[neighbor_pos_dir] = {"dist_start" : new_dist_start, "est_end" : neighor_estimate_to_goal, \
               "prev" : open_dict[chosen_candidate_pos_dir]["prev"] | {chosen_candidate_pos_dir[0]}}
@@ -302,49 +261,35 @@ def find_shortest_paths_aux(char_table) :
               open_dict[neighbor_pos_dir]["prev"] = open_dict[chosen_candidate_pos_dir]["prev"] | {chosen_candidate_pos_dir[0]}
             else :
               open_dict[neighbor_pos_dir]["prev"] |= open_dict[chosen_candidate_pos_dir]["prev"] | {chosen_candidate_pos_dir[0]}
-      closed_dict[chosen_candidate_pos_dir] = open_dict[chosen_candidate_pos_dir]
-      open_dict.pop(chosen_candidate_pos_dir)
-    # helpers.print_log_entries("closed_dict.keys() : {}".format(closed_dict.keys()), log_cats = {"D"})
-  # helpers.print_log_entries("closed_dict : {}".format("\n".join(["{} : {}".format(k, ["{} : {}".format(v, closed_dict[k][v])\
-  #   if v != "prev" else closed_dict[k][v][-3:] for v in closed_dict[k]]) for k in closed_dict])), log_cats = {"D"})
-  if ((9, 3), (-1, 0)) in closed_dict :
-    helpers.print_log_entries("closed_dict[((9, 3), (-1, 0))] : {}".format(closed_dict[((9, 3), (-1, 0))]), log_cats = {"D"})
-  helpers.print_log_entries("len(closed_dict) : {}".format(len(closed_dict)), log_cats = {"D"})
+    closed_dict[chosen_candidate_pos_dir] = open_dict[chosen_candidate_pos_dir]
+    open_dict.pop(chosen_candidate_pos_dir)
   return closed_dict
 
-def display_paths(char_table, paths) :
+def highlight_tiles_str(char_table, tiles) :
   table_copy = copy.deepcopy(char_table)
-  for path in paths :
-    for ((pos_x, pos_y), dir) in path :
-      table_copy[pos_x][pos_y] = "O"
-  print(helpers.table_to_raw(table_copy))
+  for (pos_x, pos_y) in tiles.difference({find_start_and_end(char_table)[0][0], find_start_and_end(char_table)[1]}) :
+    table_copy[pos_x][pos_y] = " "
+  return helpers.table_to_raw(table_copy, None, lambda x : "-" if x == "." else x)
 
-def display_tiles(char_table, tiles) :
-  table_copy = copy.deepcopy(char_table)
-  for (pos_x, pos_y) in tiles :
-    table_copy[pos_x][pos_y] = "O"
-  print(helpers.table_to_raw(table_copy))
-
-def find_sortest_paths(char_table) :
-  start_pos, end_pos = find_start_and_end(char_table)
-  # shortest, found_paths = find_shortest_paths_aux(char_table)
-  closed_dict = find_shortest_paths_aux(char_table)
-  # print("Shortest : {}".format(shortest))
-  # display_paths(char_table, found_paths)
+def highlight_tiles_on_sortest_paths(char_table) :
+  final_str = ""
+  start_pos_dir, end_pos = find_start_and_end(char_table)
+  closed_dict = find_tiles_on_shortest_paths_aux(char_table)
+  tiles = set({end_pos})
+  dist_start = -1
   for pos_dir in closed_dict :
     if pos_dir[0] == end_pos :
-      helpers.print_log_entries("path length : {}".format(len(closed_dict[pos_dir]["prev"])), log_cats = {"D"})
-      display_tiles(char_table, closed_dict[pos_dir]["prev"])
-      # helpers.print_log_entries("Path : {}".format(closed_dict[pos_dir]["prev"]), log_cats = {"FP"})
-      path_str = "\n".join(str(elem) for elem in closed_dict[pos_dir]["prev"])
-      helpers.print_log_entries("Path : {}".format(path_str), log_cats = {"FP"})
-      helpers.print_log_entries("dist_start : {}".format(closed_dict[pos_dir]["dist_start"]), log_cats = {"R"})
-      helpers.print_log_entries("Number of tiles : {}".format(len(closed_dict[pos_dir]["prev"])), log_cats = {"R"})
-      return "good"
-  # return "bad"
+      tiles |= closed_dict[pos_dir]["prev"]
+      dist_start = closed_dict[pos_dir]["dist_start"]
+  map_with_highlight_str = highlight_tiles_str(char_table, tiles)
+  final_str += "\n".join(helpers.get_log_entries("\n" + map_with_highlight_str, log_cats = {"TILES_VIZ"})) + "\n"
+  final_str += "\n".join(helpers.get_log_entries("tiles count : {}".format(len(tiles)), log_cats = {"R"})) + "\n"
+  final_str += "\n".join(helpers.get_log_entries("dist_start : {}".format(dist_start), log_cats = {"T"}))
+  return final_str
 
-# def count_tiles_in_best_path(found_paths)
+helpers.LOG_DICT["TILES_VIZ"] = [False, "[TILES_VIZ]"]
+helpers.LOG_DICT["T"][0] = False
 
-# helpers.print_log_entries(find_sortest_paths(le_test_table), log_cats = {"T"})
-# helpers.print_log_entries(find_sortest_paths(le_test_table_2), log_cats = {"T"})
-helpers.print_log_entries(find_sortest_paths(le_char_table), log_cats = {"R"})
+# print(highlight_tiles_on_sortest_paths(le_test_table))
+# print(highlight_tiles_on_sortest_paths(le_test_table_2))
+print(highlight_tiles_on_sortest_paths(le_char_table))
