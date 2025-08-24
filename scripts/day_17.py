@@ -162,7 +162,7 @@ def octet_decompose(i) :
   while i > 0 :
     final_str = str(i & 7) + "|" + final_str
     i >>= 3
-  return final_str
+  return "|" + final_str
 
 # i = 0
 # while le_instructions != le_out :
@@ -258,11 +258,14 @@ def run2() :
   if le_reg_A == 0 :
     le_out.append(0)
   while (le_reg_A != 0) :
-    curr_word = (le_reg_A & 7) ^ 3
-    le_reg_B = (curr_word) ^ (le_reg_A >> curr_word)
-    le_reg_B ^= 3
+    curr_word = le_reg_A & 7
+    curr_word_xor_3 = curr_word ^ 3
+    shifted_reg = le_reg_A >> curr_word_xor_3
+    shifted_xored = curr_word_xor_3 ^ shifted_reg
+    le_reg_B = shifted_xored ^ 3
+    out_word = le_reg_B & 7
     le_reg_A >>= 3
-    le_out.append(le_reg_B & 7)
+    le_out.append(out_word)
 
 def run2_and_display_res() :
   run2()
@@ -283,6 +286,59 @@ helpers.print_log_entries("run2() result : {}".format(res), log_cats = "T")
 ######
 # PART 2 - Attempt at findind "reversal" function
 ######
+
+def get_res_for_reg_A_value(val) :
+  global le_reg_A
+  load_machine(le_file_content)
+  le_reg_A = val
+  run2_and_display_res()
+
+def out_to_reg_A_aux(_out, _last_out_idx, curr_reg_val = 0, recursion_depth = 0) :
+  reg_val = curr_reg_val
+  reg_val_set = set()
+  # for _out_idx in range(_last_out_idx - 1, -1, -1) :
+  _out_idx = _last_out_idx - 1
+  out_word = _out[_out_idx]
+  # found = False
+  s = 0
+  # if reg_val == 0 :
+  #   # Need this because otherwise re-running program on finding will halt too earl (at reg_A = 0)
+  #   s = 1
+  helpers.print_log_entries("", log_cats = {"D"})
+  helpers.print_log_entries("out_to_reg_A_aux() - _out, _last_out_idx, out_word, curr_reg_val, recursion_depth :",\
+    "{}, {}, {}, {}, {}".format(_out, _last_out_idx, out_word, octet_decompose(curr_reg_val), recursion_depth), log_cats = {"D"})
+  get_res_for_reg_A_value(curr_reg_val)
+  # helpers.print_log_entries("", , log_cats = {"D"})
+  for tmp_curr_word in range(s, 8) :
+    tmp_reg_val = (curr_reg_val << 3) | tmp_curr_word
+    tmp_curr_word_xor_3 = tmp_curr_word ^ 3
+    tmp_shifted_reg = tmp_reg_val >> tmp_curr_word_xor_3
+    tmp_shifted_xored = tmp_shifted_reg ^ tmp_curr_word_xor_3
+    tmp_b = tmp_shifted_xored ^ 3
+    tmp_out_word = tmp_b & 7
+    # helpers.print_log_entries("out_to_reg_A_aux() - loop - reg_val, tmp_curr_word, tmp_curr_word_xor_3, tmp_shifted_reg, tmp_shifted_xored, tmp_out_word :",\
+    #   "{}, {}, {}, {}, {}, {}".format(reg_val, tmp_curr_word, tmp_curr_word_xor_3, octet_decompose(tmp_shifted_reg),\
+    #     octet_decompose(tmp_shifted_xored), tmp_out_word), log_cats = {"D"})
+    # Need second condition because otherwise re-running program on finding will halt too earl (at reg_A = 0)
+    if tmp_out_word == out_word and tmp_reg_val != 0 :
+      # reg_val = tmp_reg_val
+      if _out_idx == 0 :
+        reg_val_set.add(tmp_reg_val)
+      else :
+        reg_val_set |= out_to_reg_A_aux(_out, _out_idx, tmp_reg_val, recursion_depth + 1)
+    else :
+      continue
+    if len(reg_val_set) > 0 :
+      return reg_val_set
+  return reg_val_set
+
+# def brute_approach(_out) :
+#   le_reg_val = 0
+#   for _out_word in _out :
+#     le_reg_val <<= 3
+#     for i in range(8) :
+#       load_machine(le_file_content)
+#       le_reg_A = le_reg_val
 
 def out_to_reg_A(_out) :
   res = 0
@@ -321,43 +377,25 @@ def out_to_reg_A(_out) :
         .format(octet_decompose(res), _out_idx, elem))
   return res
 
-def out_to_reg_A_aux(_out, _last_out_idx, last_res = 0) :
-  res = last_res
-  res_set = set()
-  for _out_idx in range(_last_out_idx - 1, -1, -1) :
-    elem = _out[_out_idx]
-    found = False
-    for i in range(8) :
-      temp_res = (res << 3) | i
-      curr_word = i ^ 3
-      _b = (curr_word) ^ (temp_res >> curr_word)
-      _b ^= 3
-      if (_b & 7) == elem :
-        res = temp_res
-        if _out_idx == 0 :
-          res_set.add(temp_res)
-        else :
-          res_set |= out_to_reg_A_aux(_out, _out_idx, res)
-  return res_set
-
-some_test_A_value = 81800
+# some_test_A_value = 1000
 
 load_machine(le_file_content)
-le_reg_A = some_test_A_value
+# le_reg_A = some_test_A_value
 print("reg_A :\n{}\n{}\nrun2() and run() have results :".format(le_reg_A, octet_decompose(le_reg_A)))
 run2_and_display_res()
 load_machine(le_file_content)
-le_reg_A = some_test_A_value
+# le_reg_A = some_test_A_value
 run_and_display_res()
 
 print("Reversal function on output (dec then octet representations) :")
 # le_res_p2 = out_to_reg_A(le_out)
-le_res_p2 = out_to_reg_A_aux(le_out, len(le_out) - 1)
-print(le_res_p2)
+le_res_p2 = out_to_reg_A_aux([2,4,1,3,7,5,4,0,1,3,0,3,5,5,3,0], len([2,4,1,3,7,5,4,0,1,3,0,3,5,5,3,0]))
+print({"{} i.e. {}".format(elem, octet_decompose(elem)) for elem in le_res_p2})
 # print(octet_decompose(le_res_p2))
 
 
-# print("Re-running machine on findings :")
-# load_machine(le_file_content)
-# le_reg_A = le_res_p2
-# run2_and_display_res()
+for candidate_res in le_res_p2 :
+  print("Re-running machine on finding {} :".format(candidate_res))
+  load_machine(le_file_content)
+  le_reg_A = candidate_res
+  run2_and_display_res()
