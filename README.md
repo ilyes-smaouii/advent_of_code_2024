@@ -59,9 +59,9 @@ but was still less than I feared it would be. Moving on to Day 13.\
 Update : just read the instructions for part 1 of Day 13. At first glance, this feels somewhat simple but also like it could take\
 quite a bit of code to achieve it. First step is parsing the input, which is I don't like thinking about too much.\
 \
-Update : realized halfway through part 2 of day 13 that there's not such thing as a "mininmum cost" unless the coefficients for A\
+Update : realized halfway through part 2 of day 13 that there's not such thing as a "mininmum cost" unless the coefficients for A
 and B happen to be exactly proportional. Just did a quick test, and this doesn't happen for any machine in the input. Don't know if
-I should incorporate this assumption in my code, or make it as agnostic to input.\
+I should incorporate this assumption in my code, or make it generic/agnostic to input.\
 \
 Update : made the code agnostic (in theory, anyway), and finally managed to solve Day 13. Won't look at Day 14's instructions
 for now, because if I do, I might not be able to move on to something else until I've solved it. I had other things to do today
@@ -71,7 +71,7 @@ Finished Day 14, which turned out easier than I expected - especially part 2, al
 Even had to change the font size for my shell.\
 \
 Update : after some discussions with friends who have already attempted AoC, I've confirmed what I was starting to suspect : unlike
-what I initially thought, AoC exercises aren't gonna be the type I can solve in just one hour. In fact, I've spend several hours on
+what I initially thought, AoC exercises aren't gonna be the type I can solve in just one hour. In fact, I've spent several hours on
 each of them almost every time, for the past several days. Considering this was kind of meant as a side quest, I might decide to
 slow down a little for the coming days, so I can free some time for other stuff I have to do.
 ### 2025/08/23
@@ -102,3 +102,9 @@ While the final "core" code is less than 20 lines long, it required very precise
 and the different steps of the algorithms, along with awareness of a few subtle technicalities. The main idea's always been the same, but
 it took me a lot of time to get it exactly right.\
 Anyway, moving on.
+### 2025/08/26
+Finished Day 18. Part 1 was pretty straightforward, it just took me some time to snuff out some small mistakes I made -
+e.g. a "<" instead of a ">" -, and then it worked pretty quickly. Same for part 2; I tried a brute appraoch, and when I saw it was too slow,
+I just changed it to a dichotomic approach, which didn't take much to implement.\
+Started looking at Day 19; I already have some idea for part 1, but depending on the data size I don't know if the program can finish
+quickly enough. We'll see when I try.\
