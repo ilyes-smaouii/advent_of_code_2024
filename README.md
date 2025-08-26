@@ -111,4 +111,6 @@ quickly enough. We'll see when I try.\
 Part 1 of Day 19 was pretty straightforward, and part 2 seemed so too, but it turns out my initial recursive approach is too costly/complex.
 Will have to figure out a better way to do this.\
 Update : got some very rough idea centered around the use of a dictionary for each design. Will think some more about it, and try to implement.
-Maybe later though, I've gotta go to sleep now.
+Maybe later though, I've gotta go to sleep now.\
+Update : figured out a new approach while I was riding the subway. I had some time + my laptop on me so I tried it, and it worked.\
+Finished Day 19 !

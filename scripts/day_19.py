@@ -58,30 +58,41 @@ helpers.print_log_entries("Possible designs count :", le_possible_design_count, 
 # PART 2
 ######
 
-def count_possible_ways_for_design_rec(design, patterns) :
-  total_count = 0
-  if len(design) == 0 :
-    return 1
-  for pattern in patterns :
-    pattern_len = len(pattern)
-    if design[:pattern_len] == pattern :
-      total_count += count_possible_ways_for_design_rec(design[pattern_len:], patterns)
-  return total_count
+# def count_possible_ways_for_design_rec(design, patterns) :
+#   total_count = 0
+#   if len(design) == 0 :
+#     return 1
+#   for pattern in patterns :
+#     pattern_len = len(pattern)
+#     if design[:pattern_len] == pattern :
+#       total_count += count_possible_ways_for_design_rec(design[pattern_len:], patterns)
+#   return total_count
 
-def count_possible_ways_efficient(design, patterns) :
-  total_count = 0
-  if len(design) == 0 :
-    return 1
-  for pattern in patterns :
-    pattern_len = len(pattern)
-    if design[:pattern_len] == pattern :
-      total_count += count_possible_ways_for_design_rec(design[pattern_len:], patterns)
-  return total_count
+# Ideas :
+# - "compressed" patterns (resulting in shorter patterns, thus quicker processing ?)
+# - numeric encoding for patterns ?
+# - 8 dicts; one for each sub_design/pattern length
+# - move through design one character at a time, each time relying on previous 7
+#     iterations --> linear complexity vs. exponential one
 
+def count_possible_ways_efficient_aux(design, patterns, max_pat_len = 8) :
+  patterns = set(patterns) # quicker search than list type
+  count_list = [1]
+  for i in range(1, len(design) + 1) :
+    next_count = 0
+    for j in range(1, 1 + min(i, max_pat_len)) :
+      if design[i-j:i] in patterns :
+        next_count += count_list[i-j]
+    count_list.append(next_count)
+  return count_list
+  
 def count_total_possible_ways(designs, patterns) :
+  max_pat_len = 0
+  for pattern in patterns :
+    max_pat_len = max(max_pat_len, len(pattern))
   total_possible_ways = 0
   for design in designs :
-    total_possible_ways += count_possible_ways_for_design_rec(design, patterns)
+    total_possible_ways += count_possible_ways_efficient_aux(design, patterns, max_pat_len)[-1]
   return total_possible_ways
 
 helpers.LOG_DICT["T"][0] = True
@@ -92,6 +103,6 @@ le_test_total_possible_ways = count_total_possible_ways(le_test_designs, le_test
 
 helpers.print_log_entries("Total possible ways count :", le_test_total_possible_ways, log_cats = {"T"})
 
-le_total_possible_ways = count_total_possible_ways(le_designs, le_patterns[:250])
+le_total_possible_ways = count_total_possible_ways(le_designs, le_patterns)
 
 helpers.print_log_entries("Total possible ways count :", le_total_possible_ways, log_cats = {"R"})
