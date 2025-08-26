@@ -3,10 +3,10 @@ import copy
 # Helper stuff
 
 LOG_DICT = {
-  "D" : tuple([False, "[DEBUG]"]),
-  "T" : tuple([False, "[TESTING]"]),
-  "I" : tuple([True, "[INFO]"]),
-  "R" : tuple([True, "[RESULTS]"]),
+  "D" : [False, "[DEBUG]"],
+  "T" : [False, "[TESTING]"],
+  "I" : [True, "[INFO]"],
+  "R" : [True, "[RESULTS]"],
   }
 
 def get_file_content_raw(filename) :
