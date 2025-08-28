@@ -115,4 +115,12 @@ Maybe later though, I've gotta go to sleep now.\
 Update : figured out a new approach while I was riding the subway. I had some time + my laptop on me so I tried it, and it worked.\
 Finished Day 19 !
 ### 2025/08/28
-Kinda stuck on Day 20. First time this has happened on part 1 of any day, I think.
+Kinda stuck on Day 20. First time this has happened on part 1 of any day, I think.\
+\
+Update : found a few approaches which are somewhat efficient (i.e. could run in one to a few hours, which is a pretty low bar). Both rely on a first
+regular exploration, then try a cheat on each tile on that "regular" path. The second one uses the orginial path as a "hint", so it doesn't have to
+re-do that part of the exploration if it stumbles on the original path.
+While they are running, thinking about the 2nd approach made me realize there is a much better approach I didn't think of : explore the whole map from
+the end to determine the minimum distance from each cell to the end, and then from each tile in that "cheatless" path, try each possible cheat, and
+because you already know the distance to the end, you don't have to re-explore anything.\
+I'll try to implement that now.
