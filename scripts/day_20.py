@@ -120,7 +120,14 @@ def get_neighbor_wall_cells(maze, pos) :
   helpers.print_log_entries("get_neighbor_wall_cells() - neighbors_with_data :", neighbors_with_data, log_cats = {"D"})
   return neighbors_with_data
 #
-
+def is_not_wall_pos(maze, pos) :
+  row_count = len(maze)
+  col_count = len(maze[0])
+  pos_row, pos_col = pos
+  if 0 <= pos_row <= row_count - 1 and 0 <= pos_col <= col_count - 1 :
+    return maze[pos_row][pos_col] != WALL_CHAR
+  return False
+#
 def find_shortest_path_aux(maze, start_pos, end_pos, cheat_seed = -1) :
   start_data = {"dist_start" : 0, "cost_estimate" : 0 + estimate_distance(start_pos, end_pos), "path" : [], "has_cheat" : False}
   open_set = {start_pos : start_data}
@@ -141,9 +148,9 @@ def find_shortest_path_aux(maze, start_pos, end_pos, cheat_seed = -1) :
     for neighbor_pos, dir, cost, is_cheat in get_neighbors(maze, chosen_pos, with_cheat) :
       cheat_positions = (NO_POS, NO_POS)
       if is_cheat :
-        pos_x, pos_y = neighbor_pos
-        dir_x, dir_y = dir
-        cheat_positions = ((pos_x, pos_y), (pos_x + dir_x, pos_y + dir_y))
+        pos_row, pos_col = neighbor_pos
+        dir_row, dir_col = dir
+        cheat_positions = ((pos_row, pos_col), (pos_row + dir_row, pos_col + dir_col))
       if neighbor_pos in closed_set :
         continue
       neighbor_dist_start = chosen_data["dist_start"] + cost
@@ -219,8 +226,8 @@ def update_neighbor(open_dict, closed_dict, neighbor_pos, dir, cost, prev_pos, e
   pass
 #
 
-def finish_exploration(maze, end_pos, open_dict, closed_dict, max_cost = -1) :
-  while len(open_dict) > 0 and end_pos not in closed_dict :
+def finish_exploration(maze, end_pos, open_dict, closed_dict, max_cost = -1, explore_all = False) :
+  while len(open_dict) > 0 and (explore_all or end_pos not in closed_dict) :
     pos_with_lowest_est = find_pos_with_lowest_estimate(open_dict)
     if open_dict[pos_with_lowest_est]["cost_estimate"] > max_cost > -1 :
       return
@@ -304,13 +311,66 @@ def find_cheats_v2(maze) :
         temp_cost = temp_closed_dict[end_pos]["dist_start"]
         if temp_cost <= least_cost_no_cheats - 100 :
           count += 1
-          # (pos_x, pos_y), (dir_x, dir_y) = neighbor_pos, dir
-          # cheats_dict[((pos_x, pos_y), (pos_x + dir_x, pos_y + dir_y))] = temp_cost
+          # (pos_row, pos_col), (dir_row, dir_col) = neighbor_pos, dir
+          # cheats_dict[((pos_row, pos_col), (pos_row + dir_row, pos_col + dir_col))] = temp_cost
   return (cheats_dict, count)
+#
+def find_cheatless_cost(maze) :
+  start_pos, end_pos = find_start_and_end(maze)
+  start_data = {"dist_start" : 0, "cost_estimate" : 0 + estimate_distance(start_pos, end_pos), "prev" : NO_POS}
+  open_dict = {start_pos : start_data}
+  closed_dict = dict()
+  finish_exploration(maze, end_pos, open_dict, closed_dict, explore_all = False)
+  return closed_dict[end_pos]["dist_start"]
+#
+def find_cheats_v3(maze) :
+  start_pos, end_pos = find_start_and_end(maze)
+  end_data = {"dist_start" : 0, "cost_estimate" : 0 + estimate_distance(start_pos, end_pos), "prev" : NO_POS}
+  open_dict = {end_pos : end_data}
+  closed_dict = dict()
+  # first, explore map from end, to get minimum distance from each cell to the end
+  finish_exploration(maze, start_pos, open_dict, closed_dict, explore_all = True)
+  distance_to_end = dict()
+  for row_idx in range(len(maze)) :
+    for col_idx in range(len(maze[0])) :
+      pos = row_idx, col_idx
+      if pos in closed_dict :
+        distance_to_end[pos] = closed_dict[pos]["dist_start"]
+      elif pos in open_dict :
+        distance_to_end[pos] = open_dict[pos]["dist_start"]
+      elif not is_not_wall_pos(maze, pos) :
+        pass
+      else :
+        raise Exception("find_cheats_v3() error : pos {} should be in either closed_dict or open_dict !".format(pos))
+  # compute "cheatless" path
+  cheatless_path = [start_pos]
+  next_pos = closed_dict[start_pos]["prev"]
+  while next_pos != NO_POS :
+    cheatless_path.append(next_pos)
+    next_pos = closed_dict[next_pos]["prev"]
+  cheatless_cost = len(cheatless_path) - 1
+  # then, from each cell in cheatless path, try to go through neighboring walls, and compute distance to end using distance_to_end
+  cheat_dict = dict()
+  for tile_idx in range(len(cheatless_path)) :
+    tile_pos = cheatless_path[tile_idx]
+    tile_dist_start = tile_idx
+    for neighbor_pos, dir, cost, is_wall in get_neighbor_wall_cells(maze, tile_pos) :
+      (pos_row, pos_col), (dir_row, dir_col) = neighbor_pos, dir
+      cheat_positions = ((pos_row, pos_col), (pos_row + dir_row, pos_col + dir_col))
+      after_wall_pos = pos_row + dir_row, pos_col + dir_col
+      if is_not_wall_pos(maze, after_wall_pos) :
+        after_wall_dist = tile_dist_start + 2 * cost
+        # helpers.print_log_entries("tile_pos : {}, tile_dist_start : {}, after_wall_dist : {}"\
+        #   ", distance_to_end[{}] : {}".format(tile_pos, tile_dist_start, after_wall_dist,\
+        #     after_wall_pos, distance_to_end[after_wall_pos]), log_cats = {"DIST"})
+        cheat_cost = after_wall_dist + distance_to_end[after_wall_pos]
+        cheat_dict[cheat_positions] = min(cheat_cost, cheatless_cost)
+  return cheat_dict
 
 # helpers.LOG_DICT["T"][0] = True
 helpers.LOG_DICT["DICT_LEN"] = [False, "[DICT_LEN]"]
 helpers.LOG_DICT["ITER"] = [True, "[ITER]"]
+helpers.LOG_DICT["DIST"] = [True, "[DIST]"]
 
 # helpers.print_log_entries("find_shortest_path(le_test_table)"\
 # # , find_shortest_path(le_test_table), log_cats = {"T"})
@@ -342,8 +402,17 @@ helpers.LOG_DICT["ITER"] = [True, "[ITER]"]
 
 # helpers.print_log_entries("Good cheats count : {}".format(le_good_cheats_count), log_cats={"R"})
 
-print(find_cheats_v2(le_test_table))
-le_cheats_dict, le_cheats_count = find_cheats_v2(le_char_table)
+le_test_cheats_dict = find_cheats_v3(le_test_table)
+print(find_cheats_v3(le_test_table))
+le_cheatless_count = find_cheatless_cost(le_char_table)
+le_cheats_dict = find_cheats_v3(le_char_table)
+le_good_cheats_count = 0
+for cost in le_cheats_dict.values() :
+  if cost <= le_cheatless_count - 100 :
+    le_good_cheats_count += 1
+
+helpers.print_log_entries("Number of \"good\" cheats : {}".format(le_good_cheats_count), log_cats={"R"})
+# print(le_cheats_dict)
 
 ######
 # PART 2

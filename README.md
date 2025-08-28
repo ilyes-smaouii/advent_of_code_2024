@@ -123,4 +123,5 @@ re-do that part of the exploration if it stumbles on the original path.
 While they are running, thinking about the 2nd approach made me realize there is a much better approach I didn't think of : explore the whole map from
 the end to determine the minimum distance from each cell to the end, and then from each tile in that "cheatless" path, try each possible cheat, and
 because you already know the distance to the end, you don't have to re-explore anything.\
-I'll try to implement that now.
+I'll try to implement that now.\
+Update : yup, that was it, that was the right appraoch, if only I'd thought of it earlier.
