@@ -114,3 +114,5 @@ Update : got some very rough idea centered around the use of a dictionary for ea
 Maybe later though, I've gotta go to sleep now.\
 Update : figured out a new approach while I was riding the subway. I had some time + my laptop on me so I tried it, and it worked.\
 Finished Day 19 !
+### 2025/08/28
+Kinda stuck on Day 20. First time this has happened on part 1 of any day, I think.
