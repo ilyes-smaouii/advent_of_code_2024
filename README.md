@@ -124,4 +124,7 @@ While they are running, thinking about the 2nd approach made me realize there is
 the end to determine the minimum distance from each cell to the end, and then from each tile in that "cheatless" path, try each possible cheat, and
 because you already know the distance to the end, you don't have to re-explore anything.\
 I'll try to implement that now.\
-Update : yup, that was it, that was the right appraoch, if only I'd thought of it earlier.
+Update : yup, that was it, that was the right appraoch, if only I'd thought of it earlier.\
+Just read part. 2, and with the approach I found for part 1, I feel like part 2 should be pretty easy, and shouldn't require too much change in the code
+from part 1. Will try later.\
+Update : tried it while I was on the train; it was pretty straightforward, and it worked on the 1st try.
