@@ -127,4 +127,8 @@ I'll try to implement that now.\
 Update : yup, that was it, that was the right appraoch, if only I'd thought of it earlier.\
 Just read part. 2, and with the approach I found for part 1, I feel like part 2 should be pretty easy, and shouldn't require too much change in the code
 from part 1. Will try later.\
-Update : tried it while I was on the train; it was pretty straightforward, and it worked on the 1st try.
+Update : tried it while I was on the train; it was pretty straightforward, and it worked on the 1st try.\
+\
+Update : read Day 21's instructions, and thought about it a little, I'm not seeing a clear approach to follow here. I mean, there's a something I could
+try, but I can't tell if it's the solution in theory. Plus I've been a little busy lately, so I haven't really put that much time into it. I'll try to
+think about it more, but if I can't find anything better, maybe I'll just try that approach and see what results it yields.
