@@ -73,7 +73,10 @@ def get_log_entries(*to_print, log_cats = {"I"}) :
   for log_cat in log_cats :
     if log_cat in LOG_DICT and LOG_DICT[log_cat][0] :
       should_log = True
-      prefix += LOG_DICT[log_cat][1]
+      if len(LOG_DICT[log_cat]) > 1 :
+        prefix += LOG_DICT[log_cat][1]
+      else :
+        prefix += "[" + str(log_cat) + "]"
   # print("get_log_entries() - to_print : ", to_print) # [debugging]
   if should_log :
     return [prefix + " " + str(_str) for _str in to_print]

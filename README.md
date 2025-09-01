@@ -132,3 +132,8 @@ Update : tried it while I was on the train; it was pretty straightforward, and i
 Update : read Day 21's instructions, and thought about it a little, I'm not seeing a clear approach to follow here. I mean, there's a something I could
 try, but I can't tell if it's the solution in theory. Plus I've been a little busy lately, so I haven't really put that much time into it. I'll try to
 think about it more, but if I can't find anything better, maybe I'll just try that approach and see what results it yields.
+### 2025/09/01
+Needed some tweaking to find the right approach, and then it took me a lot of time to realize I'd made a small mistake by
+lack of attention (a "<" replaced with a ">"). Once I'd found that out, I got the solution for part 1.
+I tried to solve part 2 with a similar approach, only changing the number of "steps" taken, but it's not efficient enough, and takes too long.
+Currently thinking of another approach with better complexity.
