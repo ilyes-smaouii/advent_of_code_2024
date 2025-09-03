@@ -136,4 +136,8 @@ think about it more, but if I can't find anything better, maybe I'll just try th
 Needed some tweaking to find the right approach, and then it took me a lot of time to realize I'd made a small mistake by
 lack of attention (a "<" replaced with a ">"). Once I'd found that out, I got the solution for part 1.
 I tried to solve part 2 with a similar approach, only changing the number of "steps" taken, but it's not efficient enough, and takes too long.
-Currently thinking of another approach with better complexity.
+Currently thinking of another approach with better complexity.\
+Update : got an idea, will try to implement it and see if it works.\
+### 2025/09/03
+Idea didn't seem that good after doing a bit of digging. Thought about it for the past few days, and thought of another approach,
+which I'll try to implement now. Well it's actually two approaches, but based on the same idea, but I'm not sure which one to pick exactly.

@@ -78,30 +78,30 @@ def compute_moves_names (a_name, b_name, pos_dict) :
   b_pos = pos_dict[b_name]
   return compute_moves_pos(a_pos, b_pos)
 
-def process_code_aux (code_str, pos_dict, prev_char = PRESS_CHAR) :
-  """
-  Process code to find resulting code/moves, i.e. that, when put into a robot on a keypad
-  will make it "type out" code_str
-  """
-  res_code_str = ""
-  for char_idx in range(len(code_str)) :
-    curr_char = code_str[char_idx]
-    # first, get number of each move needed to get from prev_char to curr_char
-    next_moves_dict = compute_moves_names(prev_char, curr_char, pos_dict)
-    # we should get two types of moves at most, and it seems intuitive to me all the corresponding
-    # moves should be grouped by move type, e.g. up-up-down-down, as opposed to up-down-up-down
-    # assuming I'm right, the question remains : how to order these two groups ?
-    # e.g. up-up-down-down or down-down-up-up ?
-    # Will try a random order first, and hope that doesn't have an impact on the result
-    # Update : looks like it doesn't have an impact after all, as long as the moves are grouped by
-    # same move type (?)
-    # Update : nvm it does actually, or at least it looks like it does
-    #
-    for move_type, move_count in next_moves_dict.items() :
-      res_code_str += move_count * move_type
-    res_code_str += PRESS_CHAR
-    prev_char = curr_char
-  return res_code_str
+# def process_code_aux (code_str, pos_dict, prev_char = PRESS_CHAR) :
+#   """
+#   Process code to find resulting code/moves, i.e. that, when put into a robot on a keypad
+#   will make it "type out" code_str
+#   """
+#   res_code_str = ""
+#   for char_idx in range(len(code_str)) :
+#     curr_char = code_str[char_idx]
+#     # first, get number of each move needed to get from prev_char to curr_char
+#     next_moves_dict = compute_moves_names(prev_char, curr_char, pos_dict)
+#     # we should get two types of moves at most, and it seems intuitive to me all the corresponding
+#     # moves should be grouped by move type, e.g. up-up-down-down, as opposed to up-down-up-down
+#     # assuming I'm right, the question remains : how to order these two groups ?
+#     # e.g. up-up-down-down or down-down-up-up ?
+#     # Will try a random order first, and hope that doesn't have an impact on the result
+#     # Update : looks like it doesn't have an impact after all, as long as the moves are grouped by
+#     # same move type (?)
+#     # Update : nvm it does actually, or at least it looks like it does
+#     #
+#     for move_type, move_count in next_moves_dict.items() :
+#       res_code_str += move_count * move_type
+#     res_code_str += PRESS_CHAR
+#     prev_char = curr_char
+#   return res_code_str
 #
 def get_orderings_aux(col_list) :
   if len(col_list) == 0 :
@@ -158,21 +158,6 @@ def process_code_aux_v2 (code_str, pos_dict, prev_char = PRESS_CHAR) :
     curr_row, curr_col = curr_pos
     next_moves_dict = dict()
     _orderings = set()
-    # if prev_char == "1" and curr_char == "0" :
-    #   _orderings = {">v"}
-    #   next_moves_dict = {">" : 1, "v" : 1}
-    # elif prev_char == "0" and curr_char == "1" :
-    #   _orderings = {"^<"}
-    #   next_moves_dict = {"<" : 1, "^" : 1}
-    # elif prev_char == "^" and curr_char == "<" :
-    #   _orderings = {"v<"}
-    #   next_moves_dict = {"<" : 1, "v" : 1}
-    # elif prev_char == "<" and curr_char == "^" :
-    #   _orderings = {">^"}
-    #   next_moves_dict = {">" : 1, "^" : 1}
-    # else :
-    #   next_moves_dict = compute_moves_pos(prev_pos, curr_pos, pos_dict)
-    #   _orderings = get_orderings(next_moves_dict)
     next_moves_dict = compute_moves_pos(prev_pos, curr_pos)
     _orderings = get_orderings(next_moves_dict)
     if prev_row == g_row and curr_col == g_col :
@@ -212,14 +197,20 @@ def keep_shortest_ones (coll_set) :
       res_set.add(elem)
   return res_set
 
-def keep_shortest_ones (coll_set) :
+def get_shortest_one (coll_set) :
   chosen_elem = next(iter(coll_set))
   shortest_len = len(chosen_elem)
   for elem in coll_set :
     if len(elem) < shortest_len :
       chosen_elem = elem
       shortest_len = len(chosen_elem)
-  return {chosen_elem}
+  return chosen_elem
+
+def keep_shortest_poss (new_rep) :
+  res_list = []
+  for e in new_rep :
+    res_list.append(keep_shortest_ones(e))
+  return res_list
 
 def process_code_v2 (num_keypad_input) :
   first_dir_keypad_inputs = keep_shortest_ones(process_code_aux_v2(num_keypad_input, BUTTON_POSITIONS_NUM_KEYPAD))
@@ -312,19 +303,49 @@ helpers.print_log_entries("Total complexity : {}".format(total_complexity), log_
 # PART 2
 ######
 
-def process_code_with_25_dir_aux(code, pos_dict, prev_char = PRESS_CHAR) :
-  pass
+def process_code_with_25_dir_aux(possibilities_list, pos_dict, prev_char = PRESS_CHAR) :
+  if GAP_CHAR in pos_dict :
+    g_row, g_col = pos_dict[GAP_CHAR]
+  if len(possibilities_list) > 0 :
+    first_set = possibilities_list[0]
+    first_set_list = [set()] * len(next(iter(first_set))) # assuming they're all the same length
+    for poss in first_set :
+      _prev = prev_char
+      poss_set = set()
+      for idx in range(len(poss)) :
+        curr_char = poss[idx]
+        prev_pos = pos_dict[_prev]
+        curr_pos = pos_dict[curr_char]
+        prev_row, prev_col = prev_pos
+        curr_row, curr_col = curr_pos
+        next_moves_dict = compute_moves_pos(prev_pos, curr_pos)
+        _orderings = get_orderings(next_moves_dict)
+        if prev_row == g_row and curr_col == g_col :
+          _orderings = remove_if_starts_with(_orderings, set("><"))
+          pass
+        elif prev_col == g_col and curr_row == g_row :
+          _orderings = remove_if_starts_with(_orderings, set("^v"))
+          pass
+        for _ordering in _orderings :
+          first_set_list[idx].add("".join([move * next_moves_dict[move] for move in _ordering]) + PRESS_CHAR)
+        _prev = curr_char
+    return keep_shortest_poss(first_set_list) + process_code_with_25_dir_aux(possibilities_list[1:], pos_dict, PRESS_CHAR)
+  else :
+    return []
 
 def process_code_with_25_dir(code) :
-  first_dir_keypad_inputs = keep_shortest_ones(process_code_aux_v2(code, BUTTON_POSITIONS_NUM_KEYPAD))
+  code_list = []
+  for code_char in code :
+    code_list.append({code_char})
+  first_dir_keypad_inputs = keep_shortest_poss(process_code_with_25_dir_aux(code_list, BUTTON_POSITIONS_NUM_KEYPAD))
   prev_inputs = first_dir_keypad_inputs
   output = set()
   for i in range(25) :
     helpers.print_log_entries("Reached iteration n°{}".format(i), log_cats={"ITER"})
     output = set()
     for prev_input in prev_inputs :
-      output |= keep_shortest_ones(process_code_aux_v2(prev_input, BUTTON_POSITIONS_DIR_KEYPAD))
-    output = keep_shortest_ones(output)
+      output |= keep_shortest_poss(process_code_with_25_dir_aux(prev_input, BUTTON_POSITIONS_DIR_KEYPAD))
+    output = keep_shortest_poss(output)
     prev_inputs = output
   return prev_inputs
 
