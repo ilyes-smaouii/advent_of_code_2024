@@ -141,3 +141,5 @@ Update : got an idea, will try to implement it and see if it works.\
 ### 2025/09/03
 Idea didn't seem that good after doing a bit of digging. Thought about it for the past few days, and thought of another approach,
 which I'll try to implement now. Well it's actually two approaches, but based on the same idea, but I'm not sure which one to pick exactly.
+### 2025/09/05
+Might be taking a break/slowing down for some time, I've got a few other things to take care of right now.
