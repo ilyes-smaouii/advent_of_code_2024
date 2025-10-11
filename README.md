@@ -143,3 +143,8 @@ Idea didn't seem that good after doing a bit of digging. Thought about it for th
 which I'll try to implement now. Well it's actually two approaches, but based on the same idea, but I'm not sure which one to pick exactly.
 ### 2025/09/05
 Might be taking a break/slowing down for some time, I've got a few other things to take care of right now.
+<br/>
+### 2025/10/11 [back from the break !]
+Been considering resuming this in the past few days, and today I decided to try to reason a little on paper while I was
+on my way back from sport practice. This helped me get a clearer picture for Day 21, which I was stuck on, and giving
+it a little more thought, I think I might have a hint. Will try to test/explore it and report back.
