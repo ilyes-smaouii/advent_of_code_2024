@@ -113,8 +113,11 @@ def get_orderings_aux(col_list) :
   # helpers.print_log_entries("get_orderings_aux() - returning...", log_cats={"D"})
   return res_set
 
-def get_orderings(collection) :
-  list_of_orderings = get_orderings_aux(list(collection))
+def get_orderings(some_collection) :
+  """
+  Returns list of all possible ways to order characters in some_collection
+  """
+  list_of_orderings = get_orderings_aux(list(some_collection))
   return list_of_orderings
   # return set(list_of_orderings)
 
@@ -140,6 +143,17 @@ def remove_if_starts_with(coll, charset) :
     if e[0] not in charset :
       coll_copy.add(e)
   return coll_copy
+
+def remove_if_ends_with(coll, charset) :
+  coll_copy = set()
+  for e in coll :
+    if len(e) > 0 :
+      if e[-1] not in charset :
+        coll_copy.add(e)
+    else :
+      # ?
+      pass
+  return coll_copy
 #
 def process_code_aux_v2 (code_str, pos_dict, prev_char = PRESS_CHAR) :
   """
@@ -160,6 +174,7 @@ def process_code_aux_v2 (code_str, pos_dict, prev_char = PRESS_CHAR) :
     _orderings = set()
     next_moves_dict = compute_moves_pos(prev_pos, curr_pos)
     _orderings = get_orderings(next_moves_dict)
+    # remove orderings that would make robot go over gap
     if prev_row == g_row and curr_col == g_col :
       _orderings = remove_if_starts_with(_orderings, set("><"))
       pass
@@ -279,8 +294,8 @@ helpers.print_log_entries("\n", log_cats={"R"})
 
 helpers.print_log_entries("Total test complexity : {}".format(total_test_complexity), log_cats={"T"})
 
-# rev_code(compute_complexity_v2("379A")[0])
-# rev_code("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")
+rev_code(compute_complexity_v2("379A")[0])
+rev_code("<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")
 
 # "^A<<^^A>>AvvvA" in process_code_aux_v2("379A", BUTTON_POSITIONS_NUM_KEYPAD)
 # "<A>Av<<AA>^AA>AvAA^A<vAAA>^A" in process_code_aux_v2("^A<<^^A>>AvvvA", BUTTON_POSITIONS_DIR_KEYPAD)
@@ -303,105 +318,280 @@ helpers.print_log_entries("Total complexity : {}".format(total_complexity), log_
 # PART 2
 ######
 
-def get_ctc_rep(word_str, prev_char = PRESS_CHAR) :
-  wrd_len = 0
-  ctc_dict = dict()
-  for curr_char in word_str :
-    wrd_len += 1
-    if prev_char != curr_char :
-      curr_pair = (prev_char, curr_char)
-      if curr_pair in ctc_dict :
-        ctc_dict[curr_pair] += 1
-      else :
-        ctc_dict[curr_pair] = 1
-      prev_char = curr_char
-  ctc_dict["len"] = wrd_len
-  return ctc_dict
+# def get_ctc_rep(word_str, prev_char = PRESS_CHAR) :
+#   wrd_len = 0
+#   ctc_dict = dict()
+#   for curr_char in word_str :
+#     wrd_len += 1
+#     if prev_char != curr_char :
+#       curr_pair = (prev_char, curr_char)
+#       if curr_pair in ctc_dict :
+#         ctc_dict[curr_pair] += 1
+#       else :
+#         ctc_dict[curr_pair] = 1
+#       prev_char = curr_char
+#   ctc_dict["len"] = wrd_len
+#   return ctc_dict
 
-def compute_hint(ctc_pair, pos_dict = BUTTON_POSITIONS_DIR_KEYPAD, max_step_count = 25) :
-  """
-  See if there are two paths possible from prev_char to next_char
-  If yes, find out which choice is the most beneficial, by finding next possible ctc_reps
-  for each (with max_step_count iterations at most), and seeing which one results in
-  the shortest code length
-  If max_step_count is reached before a better choice is determined, return None ?
-  """
-  prev_char, next_char = ctc_pair
-  prev_pos = pos_dict[prev_char]
-  next_pos = pos_dict[next_char]
-  moves_dict = compute_moves_pos(prev_pos, next_pos)
-  moves_count = len(moves_dict)
-  g_row, g_col = NO_POS
-  prev_row, prev_col = prev_pos
-  curr_row, curr_col = next_pos
-  if GAP_CHAR in pos_dict :
-    g_row, g_col = pos_dict[GAP_CHAR]
-  if prev_row == g_row and curr_col == g_col :
-    _orderings = remove_if_starts_with(_orderings, set("><"))
-    pass
-  elif prev_col == g_col and curr_row == g_row :
-    _orderings = remove_if_starts_with(_orderings, set("^v"))
-    pass
-  if len(_orderings) == 0 :
-    raise Exception("compute_hint() error : there should be at least one ordering(s) !")
-  elif len(_orderings) == 1 :
-    return next(iter(_orderings))
-  elif len(_orderings) > 2 :
-    raise Exception("compute_hint() error : there should be at most two ordering(s) !")
-  else :
-    orderings_list = list(_orderings)
-    fst_ordering, snd_ordering = fst_ordering, orderings_list[1]
-    ctc_dict_0 = {
-      (prev_char, fst_ordering[0]) : 1,
-      (fst_ordering[0], fst_ordering[1]) : 1,
-      (fst_ordering[1], PRESS_CHAR) : 1,
-      "len" : moves_dict[fst_ordering[0]] + moves_dict[fst_ordering[1]] + 1
-    }
-    ctc_dict_1 = {
-      (prev_char, snd_ordering[0]) : 1,
-      (snd_ordering[0], snd_ordering[1]) : 1,
-      (snd_ordering[1], PRESS_CHAR) : 1,
-      "len" : moves_dict[snd_ordering[0]] + moves_dict[snd_ordering[1]] + 1
-    }
-    for i in range(max_step_count) :
-      pass
-  for _ordering in get_orderings(moves_dict) :
-    pass
-  pass
+# def compute_hint(ctc_pair, pos_dict = BUTTON_POSITIONS_DIR_KEYPAD, max_step_count = 25) :
+#   """
+#   See if there are two paths possible from prev_char to next_char
+#   If yes, find out which choice is the most beneficial, by finding next possible ctc_reps
+#   for each (with max_step_count iterations at most), and seeing which one results in
+#   the shortest code length
+#   If max_step_count is reached before a better choice is determined, return None ?
+#   """
+#   prev_char, next_char = ctc_pair
+#   prev_pos = pos_dict[prev_char]
+#   next_pos = pos_dict[next_char]
+#   moves_dict = compute_moves_pos(prev_pos, next_pos)
+#   moves_count = len(moves_dict)
+#   g_row, g_col = NO_POS
+#   prev_row, prev_col = prev_pos
+#   curr_row, curr_col = next_pos
+#   if GAP_CHAR in pos_dict :
+#     g_row, g_col = pos_dict[GAP_CHAR]
+#   if prev_row == g_row and curr_col == g_col :
+#     _orderings = remove_if_starts_with(_orderings, set("><"))
+#     pass
+#   elif prev_col == g_col and curr_row == g_row :
+#     _orderings = remove_if_starts_with(_orderings, set("^v"))
+#     pass
+#   if len(_orderings) == 0 :
+#     raise Exception("compute_hint() error : there should be at least one ordering(s) !")
+#   elif len(_orderings) == 1 :
+#     return next(iter(_orderings))
+#   elif len(_orderings) > 2 :
+#     raise Exception("compute_hint() error : there should be at most two ordering(s) !")
+#   else :
+#     orderings_list = list(_orderings)
+#     fst_ordering, snd_ordering = fst_ordering, orderings_list[1]
+#     ctc_dict_0 = {
+#       (prev_char, fst_ordering[0]) : 1,
+#       (fst_ordering[0], fst_ordering[1]) : 1,
+#       (fst_ordering[1], PRESS_CHAR) : 1,
+#       "len" : moves_dict[fst_ordering[0]] + moves_dict[fst_ordering[1]] + 1
+#     }
+#     ctc_dict_1 = {
+#       (prev_char, snd_ordering[0]) : 1,
+#       (snd_ordering[0], snd_ordering[1]) : 1,
+#       (snd_ordering[1], PRESS_CHAR) : 1,
+#       "len" : moves_dict[snd_ordering[0]] + moves_dict[snd_ordering[1]] + 1
+#     }
+#     for i in range(max_step_count) :
+#       pass
+#   for _ordering in get_orderings(moves_dict) :
+#     pass
+#   pass
 
-def process_ctc_pair(ctc_pair, pos_dict = BUTTON_POSITIONS_DIR_KEYPAD) :
-  prev_char, next_char = ctc_pair
-  prev_pos = pos_dict[prev_char]
-  next_pos = pos_dict[next_char]
-  next_rep_set = set()
-  moves_dict = compute_moves_pos(prev_pos, next_pos)
-  g_row, g_col = NO_POS
-  prev_row, prev_col = prev_pos
-  curr_row, curr_col = next_pos
-  if GAP_CHAR in pos_dict :
-    g_row, g_col = pos_dict[GAP_CHAR]
-  _orderings = get_orderings(moves_dict)
-  if prev_row == g_row and curr_col == g_col :
-    _orderings = remove_if_starts_with(_orderings, set("><"))
-  elif prev_col == g_col and curr_row == g_row :
-    _orderings = remove_if_starts_with(_orderings, set("^v"))
-  # ?
-  pass
+# def process_ctc_pair(ctc_pair, pos_dict = BUTTON_POSITIONS_DIR_KEYPAD) :
+#   prev_char, next_char = ctc_pair
+#   prev_pos = pos_dict[prev_char]
+#   next_pos = pos_dict[next_char]
+#   next_rep_set = set()
+#   moves_dict = compute_moves_pos(prev_pos, next_pos)
+#   g_row, g_col = NO_POS
+#   prev_row, prev_col = prev_pos
+#   curr_row, curr_col = next_pos
+#   if GAP_CHAR in pos_dict :
+#     g_row, g_col = pos_dict[GAP_CHAR]
+#   _orderings = get_orderings(moves_dict)
+#   if prev_row == g_row and curr_col == g_col :
+#     _orderings = remove_if_starts_with(_orderings, set("><"))
+#   elif prev_col == g_col and curr_row == g_row :
+#     _orderings = remove_if_starts_with(_orderings, set("^v"))
+#   # ?
+#   pass
   
 
-def compute_next_rep_set(ctc_dict_set, pos_dict = BUTTON_POSITIONS_DIR_KEYPAD, prev_char = PRESS_CHAR) :
-  for ctc_dict in ctc_dict_set :
-    for ctc_pair in ctc_dict :
-      pass
+# def compute_next_rep_set(ctc_dict_set, pos_dict = BUTTON_POSITIONS_DIR_KEYPAD, prev_char = PRESS_CHAR) :
+#   for ctc_dict in ctc_dict_set :
+#     for ctc_pair in ctc_dict :
+#       pass
 
-helpers.LOG_DICT["ITER"] = [True]
+# helpers.LOG_DICT["ITER"] = [True]
 
-total_complexity_with_25_dir = 0
-for code in le_lines :
-  output_with_25_dir, curr_complexity_with_25_dir = compute_complexity_with_25_dir(code)
-  helpers.print_log_entries("Output for {} :\n{}\n(len {})".format(code, output_with_25_dir, len(output_with_25_dir)), log_cats={"R"})
-  helpers.print_log_entries("Complexity for {} : {}".format(code, curr_complexity_with_25_dir), log_cats={"R"})
-  total_complexity_with_25_dir += curr_complexity_with_25_dir
-helpers.print_log_entries("\n", log_cats={"R"})
+# total_complexity_with_25_dir = 0
+# for code in le_lines :
+#   output_with_25_dir, curr_complexity_with_25_dir = compute_complexity_with_25_dir(code)
+#   helpers.print_log_entries("Output for {} :\n{}\n(len {})".format(code, output_with_25_dir, len(output_with_25_dir)), log_cats={"R"})
+#   helpers.print_log_entries("Complexity for {} : {}".format(code, curr_complexity_with_25_dir), log_cats={"R"})
+#   total_complexity_with_25_dir += curr_complexity_with_25_dir
+# helpers.print_log_entries("\n", log_cats={"R"})
 
-helpers.print_log_entries("Total complexity : {}".format(total_complexity_with_25_dir), log_cats={"R"})
+# helpers.print_log_entries("Total complexity : {}".format(total_complexity_with_25_dir), log_cats={"R"})
+
+def process_code_aux_v3 (code_str, pos_dict, prev_char = PRESS_CHAR) :
+  """
+  Process code to find resulting code/moves, i.e. that, when put into a robot on a keypad
+  will make it "type out" code_str
+  """
+  res_codes_temp = set()
+  g_row, g_col = NO_POS
+  if GAP_CHAR in pos_dict :
+    g_row, g_col = pos_dict[GAP_CHAR]
+  if len(code_str) > 0 :
+    res = ""
+    for i in range(len(code_str)) :
+      prev_pos = pos_dict[prev_char]
+      prev_row, prev_col = prev_pos
+      curr_char = code_str[i]
+      curr_pos = pos_dict[curr_char]
+      curr_row, curr_col = curr_pos
+      #
+      next_moves_dict = dict()
+      _orderings = set()
+      next_moves_dict = compute_moves_pos(prev_pos, curr_pos)
+      _orderings = get_orderings(next_moves_dict)
+      # remove orderings that would make robot go over gap
+      if prev_row == g_row and curr_col == g_col :
+        _orderings = remove_if_starts_with(_orderings, set("><"))
+        pass
+      elif prev_col == g_col and curr_row == g_row :
+        _orderings = remove_if_starts_with(_orderings, set("^v"))
+        pass
+      # Keep better orderings
+      better_orderings = set()
+      for ordering in _orderings :
+        if len(ordering) > 1 and ordering[0] == "<" :
+          continue
+        else :
+          better_orderings.add(ordering)
+      #
+      if (len(better_orderings) > 0) :
+        _orderings = better_orderings
+      res += "".join([move * next_moves_dict[move] for move in ordering]) + PRESS_CHAR
+      prev_char = code_str[i]
+    return res
+    # return res_code_temp + process_code_aux_v3(code_str[1:], pos_dict, curr_char)
+    # for ordering in _orderings :
+    #   res_codes_temp.add("".join([move * next_moves_dict[move] for move in ordering]) + PRESS_CHAR)
+    # res_codes = set()
+    # for tmp_code_head in res_codes_temp :
+    #   for tmp_code_rest in process_code_aux_v3(code_str[1:], pos_dict, curr_char) :
+    #     res_codes.add(tmp_code_head + tmp_code_rest)
+    # return keep_shortest_ones(res_codes)
+  else :
+    return ""
+    # return {""}
+
+def process_code_v3 (num_keypad_input) :
+  # next_input = next(iter(process_code_aux_v3(num_keypad_input, BUTTON_POSITIONS_NUM_KEYPAD)))
+  # for i in range(25) :
+  #   next_input = next(iter(process_code_aux_v3(next_input, BUTTON_POSITIONS_DIR_KEYPAD)))
+  # return next_input
+  next_input = process_code_aux_v3(num_keypad_input, BUTTON_POSITIONS_NUM_KEYPAD)
+  for i in range(25) :
+    print("Currently at iteration n°{}".format(i))
+    next_input = process_code_aux_v3(next_input, BUTTON_POSITIONS_DIR_KEYPAD)
+  return next_input
+
+# process_code_v3("379A")
+
+def produce_move(keypair, pos_dict) :
+  """
+  Turns keypair into string of characters corresponding to the keys
+  that need to be pressed on a directional keypad to move from first
+  key of keypair over to second key of keypair
+  """
+  #
+  prev_char, curr_char = keypair
+  prev_pos = pos_dict[prev_char]
+  prev_row, prev_col = prev_pos
+  curr_pos = pos_dict[curr_char]
+  curr_row, curr_col = curr_pos
+  #
+  next_moves_dict = dict()
+  _orderings = set()
+  next_moves_dict = compute_moves_pos(prev_pos, curr_pos)
+  _orderings = get_orderings(next_moves_dict)
+  # 
+  g_row, g_col = NO_POS
+  if GAP_CHAR in pos_dict :
+    g_row, g_col = pos_dict[GAP_CHAR]
+  # remove orderings that would make robot go over gap
+  if prev_row == g_row and curr_col == g_col :
+    _orderings = remove_if_starts_with(_orderings, set("><"))
+    pass
+  elif prev_col == g_col and curr_row == g_row :
+    _orderings = remove_if_starts_with(_orderings, set("^v"))
+    pass
+  # Keep better ordering (one that starts with "<", if it exists)
+  # This is very important, but I don't feel like explaining in length why it should work here
+  better_ordering = next(iter(_orderings))
+  for ordering in _orderings :
+    if len(ordering) > 0 :
+      if ordering[0] == '<' :
+        better_ordering = ordering
+  return "".join([move * next_moves_dict[move] for move in better_ordering])
+
+def str_to_keypairs_dict(code_str, prev_char = PRESS_CHAR) :
+  """
+  Turns any string into a dict containing all pairs of consecutive distinct
+  keys [chars] as keys [dict keys], and the number of times they occur as values
+  """
+  press_count = 0
+  res_dict = {}
+  for next_char in code_str :
+    # if prev_char != next_char :
+    if True :
+      keypair = (prev_char, next_char)
+      if keypair not in res_dict :
+        res_dict[keypair] = 0
+      res_dict[keypair] += 1
+    press_count += 1
+    #
+    prev_char = next_char
+  return res_dict
+
+def process_code_aux_v4 (keypairs_dict, pos_dict) :
+  """
+  Process code to find resulting code/moves, i.e. that, when put into a robot on a keypad
+  will make it "type out" code_str
+  """
+  helpers.print_log_entries("aux_v4 - got called with dict {}".format(keypairs_dict), log_cats={"D"})
+  res_dict = dict()
+  press_count = 0
+  for keypair, keypair_count in keypairs_dict.items() :
+    move_and_press_addition = produce_move(keypair, pos_dict) + PRESS_CHAR
+    press_count += len(move_and_press_addition) * keypair_count
+    for addition_keypair, addition_keypair_count in str_to_keypairs_dict(move_and_press_addition).items() :
+      if addition_keypair not in res_dict :
+        res_dict[addition_keypair] = 0
+      res_dict[addition_keypair] += keypair_count * addition_keypair_count
+  # small check
+  check_sum = 0
+  for key, val in res_dict.items() :
+    check_sum += val
+  if check_sum != press_count :
+    raise RuntimeError("process_code_aux_v4() error : bad checksum !")
+  return res_dict, press_count
+
+def process_code_v4 (code_str) :
+  next_keypairs_dict = str_to_keypairs_dict(code_str)
+  next_press_count = len(code_str)
+  next_keypairs_dict, next_press_count = process_code_aux_v4(next_keypairs_dict, BUTTON_POSITIONS_NUM_KEYPAD)
+  for i in range(25) :
+    helpers.print_log_entries("Currently at iteration n°{}".format(i), log_cats = {"D"})
+    next_keypairs_dict, next_press_count = process_code_aux_v4(next_keypairs_dict, BUTTON_POSITIONS_DIR_KEYPAD)
+  return next_press_count
+
+def compute_complexity_v4(code_str) :
+  input_num_part = int(re.sub("[^0-9]", "", code_str))
+  shortest_output_length = process_code_v4(code_str)
+  return input_num_part * shortest_output_length
+
+def find_total_complexity_v4(lines) :
+  total_complexity = 0
+  for code_str in lines :
+    curr_complexity = compute_complexity_v4(code_str)
+    helpers.print_log_entries("Complexity for {} : {}".format(code_str, curr_complexity), log_cats={"R"})
+    total_complexity += curr_complexity
+  helpers.print_log_entries("\n", log_cats={"R"})
+  # helpers.print_log_entries("Total complexity : {}".format(total_complexity), log_cats={"R"})
+  return total_complexity
+
+helpers.LOG_DICT["D"][0] = False
+
+helpers.print_log_entries("", "Total complexity when we have 25 (TWENTY-FIVE !) directional"
+                          " keyboards :", find_total_complexity_v4(le_lines), log_cats= {"R"})
