@@ -173,3 +173,12 @@ which btw isn't even entirely in there, as I already removed some of the code I 
 ).\
 Update : opened up page for Day 22 but I don't think I'll read it right before going to bed actually,
 otherwise I might not be able to sleep.\
+<br>
+Update : I've just read Part 1 of Day 22, and it was pretty straightforward to solve. I even took time to make
+a C++ version, which made it much faster. Currently reading Part 2.\
+Update : just finished reading, and I feel like finishing this one in C++. First approach I'll try is the brute
+approach, with the hope it's fast enough.
+
+### 2025/10/14
+It seems slow, but I feel like I could wait it out. The issue is, my code finds a price of 0 for every monkey,
+so there's somethings wrong, but I haven't figured out what.
