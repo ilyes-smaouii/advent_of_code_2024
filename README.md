@@ -164,4 +164,12 @@ Anyway, it still wasn't the right result, so I still had to do some more digging
 Turns out I forgot to "mutliply" the moves in my code (e.g. turn `"<^"` into `"<<^"`).\
 Fixed that, ran my code again, got a new result, went to submit it online, and....\
 YES ! A NEW GOLD STAR ! DAY 21 FINALLY FINISHED !\
-I collapsed from sheer emotion, and had to take some time to recollect, but I can finally move on to something else !
+I collapsed from sheer emotion, and had to take some time to recollect, but I can finally move on to something else !\
+Honeslty at this point I'm not sure I have the wish or the will to even look at Day 22. Maybe I've endured enough
+for today.\
+Update : I was going to clean up my code, to remove all the useless code left over from my unsuccessful attempts,
+but I feel like maybe I should just leave it there, as a sort of monument to the journey I went through (
+which btw isn't even entirely in there, as I already removed some of the code I wrote during previous attempts
+).\
+Update : opened up page for Day 22 but I don't think I'll read it right before going to bed actually,
+otherwise I might not be able to sleep.\
