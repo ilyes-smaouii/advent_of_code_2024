@@ -144,7 +144,24 @@ which I'll try to implement now. Well it's actually two approaches, but based on
 ### 2025/09/05
 Might be taking a break/slowing down for some time, I've got a few other things to take care of right now.
 <br/>
+
 ### 2025/10/11 [back from the break !]
 Been considering resuming this in the past few days, and today I decided to try to reason a little on paper while I was
 on my way back from sport practice. This helped me get a clearer picture for Day 21, which I was stuck on, and giving
-it a little more thought, I think I might have a hint. Will try to test/explore it and report back.
+it a little more thought, I think I might have a hint. Will try to test/explore it and report back.\
+Update : made a small test on some very small word, and it looks like I'm on the right track (:-O).
+
+### 2025/10/13
+After another smaller break cause I was a little busy, I came back to test my theory. It took me some time
+to find how to implement the idea, then I realized it was still too inefficient, so I had to combine
+it with some earlier idea I had for efficiency, and spent some time trying to implement that too.\
+Then I tried, tried submitting the result, but it was "too low".\
+I applied some changes to the code, until I - supposedly - got a result that seemed more correct, but it was
+still too low.\
+Btw, at some point during, I started tearing up at the thought I might be close to the solution after all the days
+\- weeks ? - spent trying to find it.\
+Anyway, it still wasn't the right result, so I still had to do some more digging.\
+Turns out I forgot to "mutliply" the moves in my code (e.g. turn `"<^"` into `"<<^"`).\
+Fixed that, ran my code again, got a new result, went to submit it online, and....\
+YES ! A NEW GOLD STAR ! DAY 21 FINALLY FINISHED !\
+I collapsed from sheer emotion, and had to take some time to recollect, but I can finally move on to something else !
