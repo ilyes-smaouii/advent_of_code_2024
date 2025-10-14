@@ -187,4 +187,10 @@ wrong previously. If I'm lucky, the - allegedly - more efficient code might also
 Update : realized my code wasn't correct, and now it's too slow (it's running as I write this, and might take
 like an hour to finish)\
 Update : tried submitting an intermediary result I had before the code finished running, and it was the right value !
-Now I'll try to find that same value again, but in a more efficient/faster manner.
+Now I'll try to find that same value again, but in a more efficient/faster manner (I realized I could easily save a lot
+of time by computing prices changes once at the beginning, whereas I'm doing the equivalent as many times as there are
+negotiation arrays)\
+Update : found slightly more efficient code (still very slow, it takes a few minutes to finish).\
+Update : got some rough idea for an even more efficient code.\
+Update : code runs a lot - a looot - faster, but result is now incorrect.\
+Update : figured it out.

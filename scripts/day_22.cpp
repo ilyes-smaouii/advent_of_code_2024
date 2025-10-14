@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -7,8 +8,13 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
+
 
 using strings_vec_t = std::vector<std::string>;
 
@@ -316,20 +322,20 @@ std::uint8_t
 tryNegotiation_v4(const std::array<std::uint8_t, 2001> &prices_array,
                   const std::array<std::int8_t, 2000> &price_changes_array,
                   const std::array<std::int8_t, 4> &negotiator_array) {
-  for (std::size_t i{0}; i < price_changes_array.size() - 3; i++) {
-    if (price_changes_array.at(i) == negotiator_array.at(0) &&
-        price_changes_array.at(i + 1) == negotiator_array.at(1) &&
-        price_changes_array.at(i + 2) == negotiator_array.at(2) &&
-        price_changes_array.at(i + 3) == negotiator_array.at(3)) {
-      return prices_array.at(i + 4);
-    }
-    // auto changes_32{
-    //     reinterpret_cast<const std::int32_t *>(&(price_changes_array.at(i)))};
-    // auto negotiatior_32{
-    //     reinterpret_cast<const std::int32_t *>(&(negotiator_array.at(i)))};
-    // if (*changes_32 == *negotiatior_32) {
+  for (std::size_t i{0}; i < price_changes_array.size() - 4; i++) {
+    // if (price_changes_array.at(i) == negotiator_array.at(0) &&
+    //     price_changes_array.at(i + 1) == negotiator_array.at(1) &&
+    //     price_changes_array.at(i + 2) == negotiator_array.at(2) &&
+    //     price_changes_array.at(i + 3) == negotiator_array.at(3)) {
     //   return prices_array.at(i + 4);
     // }
+    auto changes_32{
+        reinterpret_cast<const std::int32_t *>(&(price_changes_array.at(i)))};
+    auto negotiatior_32{
+        reinterpret_cast<const std::int32_t *>(negotiator_array.data())};
+    if (*changes_32 == *negotiatior_32) {
+      return prices_array.at(i + 4);
+    }
   }
   return 0;
 }
@@ -385,6 +391,105 @@ std::uint64_t findMaxRevenue_v4(
     }
   }
   return max_revenue_all_nego;
+}
+
+using neg_t = std::array<std::int8_t, 4>;
+
+struct neg_hash {
+  std::size_t operator()(const neg_t &neg_array) const {
+    std::size_t v1{
+        std::hash<std::size_t>()(static_cast<std::size_t>(neg_array.at(0)))},
+        v2{std::hash<std::size_t>()(static_cast<std::size_t>(neg_array.at(1)))},
+        v3{std::hash<std::size_t>()(static_cast<std::size_t>(neg_array.at(2)))},
+        v4{std::hash<std::size_t>()(static_cast<std::size_t>(neg_array.at(3)))};
+    std::size_t res = v1;
+    res = res ^ v2 + 0x9e3779b9 + (res << 6) + (res >> 2);
+    res = res ^ v3 + 0x9e3779b9 + (res << 6) + (res >> 2);
+    res = res ^ v4 + 0x9e3779b9 + (res << 6) + (res >> 2);
+    return res;
+  }
+};
+
+std::uint64_t findMaxRevenue_v5(
+    const std::vector<std::array<std::uint8_t, 2001>> &prices_table) {
+  auto prices_changes_table = getChangesTable(prices_table);
+
+  std::unordered_map<neg_t, std::uint64_t, neg_hash> neg_map{};
+
+  // First, fill neg_values with 0's
+  std::size_t iter_count{0};
+  neg_t neg_array{};
+  std::int8_t &it_0{neg_array.at(0)}, &it_1{neg_array.at(1)},
+      &it_2{neg_array.at(2)}, &it_3{neg_array.at(3)};
+  for (it_0 = -9; it_0 < 10; it_0++) {
+    // nego_array.at(0) = it_1;
+    for (it_1 = -9; it_1 < 10; it_1++) {
+      // nego_array.at(1) = it_2;
+      // std::cout << std::format("findMaxRevenue() - filling - currently at "
+      //                          "iteration/negotiation array n°{}",
+      //                          iter_count)
+      //           << std::endl; // [Debugging]
+      for (it_2 = -9; it_2 < 10; it_2++) {
+        // nego_array.at(2) = it_3;
+        for (it_3 = -9; it_3 < 10; it_3++) {
+          // if (neg_array == neg_t{-1, 8, 2, 3}) {
+          //   throw std::runtime_error("Found it !");
+          // }
+          iter_count++;
+          auto max_it = std::max({it_0, it_1, it_2, it_3});
+          auto min_it = std::min({it_0, it_1, it_2, it_3});
+          if ((max_it - min_it) > 9) {
+            // continue;
+          }
+          neg_map[{it_0, it_1, it_2, it_3}] = 0;
+        }
+      }
+    }
+  }
+
+  // then go through prices, and update corresponding neg_values accordingly
+  iter_count = 0;
+  for (std::size_t row_idx{0}; row_idx < prices_table.size(); row_idx++) {
+    const auto &prices_array = prices_table.at(row_idx);
+    const auto &changes_array = prices_changes_table.at(row_idx);
+    std::unordered_set<neg_t, neg_hash> encountered_negs{};
+    // std::cout << std::format("Currently at iteration n°{}", iter_count) << std::endl; // [Debugging]
+    for (std::size_t col_idx{0}; col_idx < prices_array.size() - 4; col_idx++) {
+      iter_count++;
+      auto sub_changes_array =
+          reinterpret_cast<const neg_t *>(&(changes_array.at(col_idx)));
+      auto neg_iter = neg_map.find(*sub_changes_array);
+      if (neg_iter != neg_map.end()) {
+        // if (prices_array.at(col_idx + 4) !=
+        //     prices_array.at(col_idx) + sub_changes_array->at(0) +
+        //         sub_changes_array->at(1) + sub_changes_array->at(2) +
+        //         sub_changes_array->at(3)) {
+        //   throw std::runtime_error("Error : bad (inconsistent) changes array
+        //   !");
+        // }
+        if (encountered_negs.contains(neg_iter->first)) {
+          ;
+        } else {
+          (neg_iter->second) += prices_array.at(col_idx + 4);
+          encountered_negs.insert(neg_iter->first);
+        }
+      } else {
+        throw std::runtime_error(
+            std::format("Error : neg value ({}, {}, {}, {}) (found at row_idx, "
+                        "col_idx = ({}, {})) should already be in map !",
+                        sub_changes_array->at(0), sub_changes_array->at(1),
+                        sub_changes_array->at(2), sub_changes_array->at(3),
+                        row_idx, col_idx));
+      }
+      // neg_values[*changes_array] += prices_array.at(col_idx + 4);
+    }
+  }
+  std::uint64_t max_revenue{0};
+  for (auto neg_values_iter = neg_map.begin(); neg_values_iter != neg_map.end();
+       neg_values_iter++) {
+    max_revenue = std::max({max_revenue, neg_values_iter->second});
+  }
+  return max_revenue;
 }
 
 int main(int argc, char *argv[]) {
@@ -469,6 +574,19 @@ int main(int argc, char *argv[]) {
   // std::endl;
   //
   // v4
+  // auto prices_table = getPricesTable_v3(le_lines);
+  // // for (const auto &row : prices_table) {
+  // //   for (const auto &pr : row) {
+  // //     std::cout << (int)(pr) << ", "; // [Debugging]
+  // //   }
+  // //   std::cout << std::endl; // [Debugging]
+  // // }
+  // std::cout << std::endl; // [Debugging]
+  // auto max_rev = findMaxRevenue_v4(prices_table);
+  // std::cout << std::format("Found max revenue of {} !", max_rev) <<
+  // std::endl;
+  //
+  // v5
   auto prices_table = getPricesTable_v3(le_lines);
   // for (const auto &row : prices_table) {
   //   for (const auto &pr : row) {
@@ -477,8 +595,8 @@ int main(int argc, char *argv[]) {
   //   std::cout << std::endl; // [Debugging]
   // }
   std::cout << std::endl; // [Debugging]
-  auto max_rev = findMaxRevenue_v4(prices_table);
-  std::cout << std::format("Found max revenue of {} !", max_rev) << std::endl;
+  auto max_rev = findMaxRevenue_v5(prices_table);
+  std::cout << std::format("Found max possible revenue of {} !", max_rev) << std::endl;
   //
   // auto prices_table = getPricesTable({"1", "2", "3", "2024"});
   // auto prices_array = get2000Prices(std::stoi(argv[1]));
