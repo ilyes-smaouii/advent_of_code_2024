@@ -8,8 +8,10 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> fileToLines(const std::string &filename) {
-  std::vector<std::string> res_vec{};
+using strings_vec_t = std::vector<std::string>;
+
+strings_vec_t fileToLines(const std::string &filename) {
+  strings_vec_t res_vec{};
   std::ifstream file;
   file.open(filename);
   std::string curr_line;
@@ -37,7 +39,7 @@ std::uint32_t getNthSecret(std::uint32_t secret_nbr_0, std::size_t n) {
   return secret_nbr_0;
 }
 
-std::uint64_t getSumOf2000thNumbers(const std::vector<std::string> &lines) {
+std::uint64_t getSumOf2000thNumbers(const strings_vec_t &lines) {
   std::uint64_t sum{0};
   for (const auto &line : lines) {
     auto s_0 = std::stol(line); // std::stol rather than std::stoi so it's
@@ -79,8 +81,19 @@ std::int8_t tryNegotiation(const std::array<std::int8_t, 2001> &prices_array,
   const std::int8_t &n0{negotiator_array[0]}, &n1{negotiator_array[1]},
       &n2{negotiator_array[2]}, &n3{negotiator_array[3]};
   // TO-DO : go through array and try
-  // something std::memcmp ?
-  // []
+
+  // something with std::memcmp ?
+  // auto p8 = reinterpret_cast<const std::uint8_t*>(&prices_array.at(i))
+  // auto p32 = reinterpret_cast<const std::uint32_t*>(p8)
+  // auto n32 = reinterpret_cast<const std::uint32_t*>([array as arr_element *
+  // -1 + smth for each element, w/ 0 <= elem <= 9 (same as prices)])
+  // auto sum = p32 + n32
+  // auto vals_8 = reinterpret_cast<const std::uint8*>(&sum);
+  // if (vals_8[0] == vals_8[1] && [...])
+  // {
+  //  return p8[3];
+  // }
+
   // element-by-element comparison ?
   /* n0 = -6;
   n1 = 0;
@@ -95,6 +108,77 @@ std::int8_t tryNegotiation(const std::array<std::int8_t, 2001> &prices_array,
     }
   }
   return 0;
+}
+std::int8_t
+tryNegotiation_v2(const std::array<std::int8_t, 2001> &prices_array,
+                  const std::array<std::int8_t, 4> &negotiator_array) {
+  const std::int8_t &n0{negotiator_array[0]}, &n1{negotiator_array[1]},
+      &n2{negotiator_array[2]}, &n3{negotiator_array[3]};
+  // TO-DO : go through array and try
+
+  // something with std::memcmp ?
+  // auto p8 = reinterpret_cast<const std::uint8_t*>(&prices_array.at(i))
+  // auto p32 = reinterpret_cast<const std::uint32_t*>(p8)
+  // auto n32 = reinterpret_cast<const std::uint32_t*>([array as arr_element *
+  // -1 + smth for each element, w/ 0 <= elem <= 9 (same as prices)])
+  // auto sum = p32 + n32
+  // auto vals_8 = reinterpret_cast<const std::uint8*>(&sum);
+  // if (vals_8[0] == vals_8[1] && [...])
+  // {
+  //  return p8[3];
+  // }
+
+  auto nego_32 =
+      reinterpret_cast<const std::uint32_t *>(negotiator_array.data());
+  for (std::size_t i{0}; i < prices_array.size() - 4; i++) {
+    auto price_8 =
+        reinterpret_cast<const std::uint8_t *>(&(prices_array.at(i)));
+    auto price_32 =
+        reinterpret_cast<const std::uint32_t *>(&(prices_array.at(i)));
+    std::uint32_t sum = *price_32 + *nego_32;
+    auto *sum_8 = reinterpret_cast<std::uint8_t *>(&sum);
+
+    if (sum_8[0] == sum_8[1] && sum_8[1] == sum_8[2] && sum_8[2] == sum_8[3]) {
+      return price_8[3];
+    }
+  }
+  return 0;
+}
+
+std::uint64_t
+findMaxRevenue(const std::vector<std::array<std::int8_t, 2001>> &prices_table) {
+  std::array<std::int8_t, 4> nego_array{};
+  std::uint64_t max_revenue{0};
+  // loop through all possible negotiation arrays
+  for (std::int8_t it_1{0}; it_1 < 10; it_1++) {
+    for (std::int8_t it_2{0}; it_2 < 10; it_2++) {
+      for (std::int8_t it_3{0}; it_3 < 10; it_3++) {
+        for (std::int8_t it_4{0}; it_4 < 10; it_4++) {
+          // for each possible negotiation array :
+          nego_array = {it_1, it_2, it_3, it_4};
+          std::uint64_t total_revenue{0};
+          // try all negotiation with current negotiation
+          for (const auto &line : prices_table) {
+            total_revenue += tryNegotiation_v2(line, nego_array);
+          }
+          if (total_revenue > max_revenue) {
+            max_revenue = total_revenue;
+          }
+        }
+      }
+    }
+  }
+  return max_revenue;
+}
+
+std::vector<std::array<std::int8_t, 2001>> getPricesTable (const strings_vec_t& lines) {
+  std::vector<std::array<std::int8_t, 2001>> res_table{};
+  for (const auto& line : lines) {
+    auto initial_secret = static_cast<std::uint32_t>(std::stoi(line));
+    auto prices_array = get2000Prices(initial_secret);
+    res_table.push_back(prices_array);
+  }
+  return res_table;
 }
 
 int main(int argc, char *argv[]) {
