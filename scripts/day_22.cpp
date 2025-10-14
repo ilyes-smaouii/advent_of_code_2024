@@ -73,9 +73,23 @@ secretsToPrices(const std::array<std::uint32_t, 2001> &secrets_array) {
   return prices_array;
 }
 
+std::array<std::uint8_t, 2001>
+secretsToPrices_v3(const std::array<std::uint32_t, 2001> &secrets_array) {
+  std::array<std::uint8_t, 2001> prices_array{};
+  for (std::size_t i{0}; i < 2001; i++) {
+    prices_array[i] = secrets_array[i] % 10;
+  }
+  return prices_array;
+}
+
 std::array<std::int8_t, 2001> get2000Prices(std::uint32_t initial_secret) {
   auto secrets_array = get2000NextSecrets(initial_secret);
   return secretsToPrices(secrets_array);
+}
+
+std::array<std::uint8_t, 2001> get2000Prices_v3(std::uint32_t initial_secret) {
+  auto secrets_array = get2000NextSecrets(initial_secret);
+  return secretsToPrices_v3(secrets_array);
 }
 
 /* std::int8_t tryNegotiation(const std::array<std::int8_t, 2001>
@@ -117,9 +131,9 @@ tryNegotiation_v2(const std::array<std::int8_t, 2001> &prices_array,
                   const std::array<std::int8_t, 4> &negotiator_array) {
   const auto nego_32 =
       reinterpret_cast<const std::uint32_t *>(negotiator_array.data());
-  // const std::uint32_t *price_32;
-  // std::uint32_t sum;
-  // std::int8_t *sum_8 = reinterpret_cast<std::int8_t *>(&sum);
+  const std::uint32_t *price_32;
+  auto sum32 = new std::uint32_t;
+  std::int8_t *sum_8 = reinterpret_cast<std::int8_t *>(sum32);
   for (std::size_t i{0}; i < prices_array.size() - 4; i++) {
     // price_32 =
     // reinterpret_cast<const std::uint32_t *>(&(prices_array.at(i + 1)));
@@ -131,7 +145,8 @@ tryNegotiation_v2(const std::array<std::int8_t, 2001> &prices_array,
     // if (prices_array.at(i) == sum_8[0] == sum_8[1] == sum_8[2] == sum_8[3]) {
     //   return prices_array.at(i + 4);
     // }
-    if (prices_array.at(i) == sum1 == sum2 == sum3 == sum4) {
+    if ((prices_array.at(i) == sum1) && (sum1 == sum2) && (sum2 == sum3) &&
+        (sum3 == sum4)) {
       return prices_array.at(i + 4);
     }
     // if (prices_array.at(i) ==
@@ -149,15 +164,40 @@ tryNegotiation_v2(const std::array<std::int8_t, 2001> &prices_array,
   return 0;
 }
 
-std::uint64_t
-findMaxRevenue(const std::vector<std::array<std::int8_t, 2001>> &prices_table) {
+std::uint8_t
+tryNegotiation_v3(const std::array<std::uint8_t, 2001> &prices_array,
+                  std::int8_t offset,
+                  const std::array<std::uint8_t, 4> &negotiator_array) {
+  const auto nego_32 =
+      reinterpret_cast<const std::uint32_t *>(negotiator_array.data());
+  const std::uint32_t *price_32;
+  auto sum32 = new std::uint32_t;
+  std::uint8_t *sum_8 = reinterpret_cast<std::uint8_t *>(sum32);
+  std::uint16_t *sum_16 = reinterpret_cast<std::uint16_t *>(sum32);
+  for (std::size_t i{0}; i < prices_array.size() - 4; i++) {
+    price_32 =
+        reinterpret_cast<const std::uint32_t *>(&(prices_array.at(i + 1)));
+    *sum32 = *nego_32 + *price_32;
+    if (static_cast<std::int8_t>(prices_array.at(i + 1)) -
+            static_cast<std::int8_t>(prices_array.at(i)) ==
+        offset) {
+      if (sum_16[0] == sum_16[1] && sum_8[0] == sum_8[1]) {
+        return prices_array.at(i + 4);
+      }
+    }
+  }
+  return 0;
+}
+
+std::uint64_t findMaxRevenue_v2(
+    const std::vector<std::array<std::int8_t, 2001>> &prices_table) {
   std::array<std::int8_t, 4> nego_array{};
   std::uint64_t max_revenue_all_nego{0};
   // loop through all possible negotiation arrays
   std::size_t iter_count{0};
-  for (std::int8_t it_1{-9}; it_1 < 10; it_1++) {
+  for (std::int8_t it_0{-9}; it_0 < 10; it_0++) {
     // nego_array.at(0) = it_1;
-    for (std::int8_t it_2{-9}; it_2 < 10; it_2++) {
+    for (std::int8_t it_1{-9}; it_1 < 10; it_1++) {
       // nego_array.at(1) = it_2;
       std::cout << std::format("findMaxRevenue() - Currently at "
                                "iteration/negotiation array n°{}",
@@ -166,25 +206,26 @@ findMaxRevenue(const std::vector<std::array<std::int8_t, 2001>> &prices_table) {
       std::cout << std::format("(max revenue currently at {})",
                                max_revenue_all_nego)
                 << std::endl; // [Debugging]
-      for (std::int8_t it_3{-9}; it_3 < 10; it_3++) {
+      for (std::int8_t it_2{-9}; it_2 < 10; it_2++) {
         // nego_array.at(2) = it_3;
         for (std::int8_t it_4{-9}; it_4 < 10; it_4++) {
           iter_count++;
 
           // [check on validity of nego array]
-          auto max_it = std::max({it_1, it_2, it_3, it_4});
-          auto min_it = std::min({it_1, it_2, it_3, it_4});
+          auto max_it = std::max({it_0, it_1, it_2, it_4});
+          auto min_it = std::min({it_0, it_1, it_2, it_4});
           if ((max_it - min_it) > 9) {
             continue;
           }
 
           // nego_array.at(3) = it_4;
-          nego_array = {it_1, it_2, it_3, it_4};
+          nego_array = {it_0, it_1, it_2, it_4};
           // for each possible negotiation array :
           std::uint64_t total_revenue_curr_nego{0};
           // try all negotiation with current negotiation
-          for (const auto &line : prices_table) {
-            total_revenue_curr_nego += tryNegotiation_v2(line, nego_array);
+          for (const auto &prices_array : prices_table) {
+            total_revenue_curr_nego +=
+                tryNegotiation_v2(prices_array, nego_array);
           }
           if (total_revenue_curr_nego > max_revenue_all_nego) {
             max_revenue_all_nego = total_revenue_curr_nego;
@@ -196,12 +237,66 @@ findMaxRevenue(const std::vector<std::array<std::int8_t, 2001>> &prices_table) {
   return max_revenue_all_nego;
 }
 
+std::uint64_t findMaxRevenue_v3(
+    const std::vector<std::array<std::uint8_t, 2001>> &prices_table) {
+  std::array<std::uint8_t, 4> nego_array{};
+  std::uint64_t max_revenue_all_nego{0};
+  // loop through all possible negotiation arrays
+  std::size_t iter_count{0};
+  for (std::uint8_t it_0{0}; it_0 < 10; it_0++) {
+    // nego_array.at(0) = it_1;
+    for (std::uint8_t it_1{0}; it_1 < 10; it_1++) {
+      // nego_array.at(1) = it_2;
+      std::cout << std::format("findMaxRevenue() - Currently at "
+                               "iteration/negotiation array n°{}",
+                               iter_count)
+                << std::endl; // [Debugging]
+      std::cout << std::format("(max revenue currently at {})",
+                               max_revenue_all_nego)
+                << std::endl; // [Debugging]
+      for (std::uint8_t it_2{0}; it_2 < 10; it_2++) {
+        // nego_array.at(2) = it_3;
+        for (std::uint8_t it_4{0}; it_4 < 10; it_4++) {
+          for (std::int8_t offset{-9}; offset < 10; offset++) {
+            iter_count++;
+
+            // nego_array.at(3) = it_4;
+            nego_array = {it_0, it_1, it_2, it_4};
+            // for each possible negotiation array :
+            std::uint64_t total_revenue_curr_nego{0};
+            // try all negotiation with current negotiation
+            for (const auto &prices_array : prices_table) {
+              total_revenue_curr_nego +=
+                  tryNegotiation_v3(prices_array, offset, nego_array);
+            }
+            if (total_revenue_curr_nego > max_revenue_all_nego) {
+              max_revenue_all_nego = total_revenue_curr_nego;
+            }
+          }
+        }
+      }
+    }
+  }
+  return max_revenue_all_nego;
+}
+
 std::vector<std::array<std::int8_t, 2001>>
-getPricesTable(const strings_vec_t &lines) {
+getPricesTable_v2(const strings_vec_t &lines) {
   std::vector<std::array<std::int8_t, 2001>> res_table{};
   for (const auto &line : lines) {
     auto initial_secret = static_cast<std::uint32_t>(std::stoi(line));
     auto prices_array = get2000Prices(initial_secret);
+    res_table.push_back(prices_array);
+  }
+  return res_table;
+}
+
+std::vector<std::array<std::uint8_t, 2001>>
+getPricesTable_v3(const strings_vec_t &lines) {
+  std::vector<std::array<std::uint8_t, 2001>> res_table{};
+  for (const auto &line : lines) {
+    auto initial_secret = static_cast<std::uint32_t>(std::stoi(line));
+    auto prices_array = get2000Prices_v3(initial_secret);
     res_table.push_back(prices_array);
   }
   return res_table;
@@ -263,12 +358,37 @@ int main(int argc, char *argv[]) {
   } */
 
   // v2
-  // auto prices_table = getPricesTable(le_lines);
-  // auto max_rev = findMaxRevenue(prices_table);
+  // auto prices_table = getPricesTable_v2(le_lines);
+  // // for (const auto &row : prices_table) {
+  // //   for (const auto &pr : row) {
+  // //     std::cout << (int)(pr) << ", "; // [Debugging]
+  // //   }
+  // //   std::cout << std::endl; // [Debugging]
+  // // }
+  // std::cout << std::endl; // [Debugging]
+  // auto max_rev = findMaxRevenue_v2(prices_table);
   // std::cout << std::format("Found max revenue of {} !", max_rev) <<
   // std::endl;
-  auto prices_table = getPricesTable({"1", "2", "3", "2024"});
-  auto price =
-      tryNegotiation_v2(get2000Prices(std::stoi(argv[1])), {2, 1, 2, -1});
-  std::cout << "price : " << static_cast<int>(price) << std::endl;
+  //
+  // v3
+  auto prices_table = getPricesTable_v3(le_lines);
+  // for (const auto &row : prices_table) {
+  //   for (const auto &pr : row) {
+  //     std::cout << (int)(pr) << ", "; // [Debugging]
+  //   }
+  //   std::cout << std::endl; // [Debugging]
+  // }
+  std::cout << std::endl; // [Debugging]
+  auto max_rev = findMaxRevenue_v3(prices_table);
+  std::cout << std::format("Found max revenue of {} !", max_rev) << std::endl;
+  //
+  // auto prices_table = getPricesTable({"1", "2", "3", "2024"});
+  // auto prices_array = get2000Prices(std::stoi(argv[1]));
+  // for (const auto &pr : prices_array) {
+  //   std::cout << (int)(pr) << ", "; // [Debugging]
+  // }
+  // std::cout << std::endl; // [Debugging]
+  // auto price = tryNegotiation_v2(prices_array, {0, 2, 2, -5});
+  // // price = findMaxRevenue({prices});
+  // std::cout << "price : " << static_cast<int>(price) << std::endl;
 }
