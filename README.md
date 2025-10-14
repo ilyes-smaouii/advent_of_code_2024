@@ -183,4 +183,8 @@ approach, with the hope it's fast enough.
 It seems slow, but I feel like I could wait it out. The issue is, my code finds a price of 0 for every monkey,
 so there's somethings wrong, but I haven't figured out what.\
 Update : decided to write code that should be more efficient, even though I still haven't figured out what was
-wrong previously. If I'm lucky, the - allegedly - more efficient code might also be correct.
+wrong previously. If I'm lucky, the - allegedly - more efficient code might also be correct.\
+Update : realized my code wasn't correct, and now it's too slow (it's running as I write this, and might take
+like an hour to finish)\
+Update : tried submitting an intermediary result I had before the code finished running, and it was the right value !
+Now I'll try to find that same value again, but in a more efficient/faster manner.

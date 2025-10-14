@@ -189,6 +189,16 @@ tryNegotiation_v3(const std::array<std::uint8_t, 2001> &prices_array,
   return 0;
 }
 
+std::array<std::int8_t, 2000>
+pricesToPriceChanges(const std::array<std::uint8_t, 2001> &prices_array) {
+  std::array<std::int8_t, 2000> changes_array{};
+  for (std::size_t i{0}; i < changes_array.size(); i++) {
+    changes_array.at(i) = static_cast<std::int8_t>(prices_array.at(i + 1)) -
+                          static_cast<std::int8_t>(prices_array.at(i));
+  }
+  return changes_array;
+}
+
 std::uint64_t findMaxRevenue_v2(
     const std::vector<std::array<std::int8_t, 2001>> &prices_table) {
   std::array<std::int8_t, 4> nego_array{};
@@ -302,6 +312,81 @@ getPricesTable_v3(const strings_vec_t &lines) {
   return res_table;
 }
 
+std::uint8_t
+tryNegotiation_v4(const std::array<std::uint8_t, 2001> &prices_array,
+                  const std::array<std::int8_t, 2000> &price_changes_array,
+                  const std::array<std::int8_t, 4> &negotiator_array) {
+  for (std::size_t i{0}; i < price_changes_array.size() - 3; i++) {
+    if (price_changes_array.at(i) == negotiator_array.at(0) &&
+        price_changes_array.at(i + 1) == negotiator_array.at(1) &&
+        price_changes_array.at(i + 2) == negotiator_array.at(2) &&
+        price_changes_array.at(i + 3) == negotiator_array.at(3)) {
+      return prices_array.at(i + 4);
+    }
+    // auto changes_32{
+    //     reinterpret_cast<const std::int32_t *>(&(price_changes_array.at(i)))};
+    // auto negotiatior_32{
+    //     reinterpret_cast<const std::int32_t *>(&(negotiator_array.at(i)))};
+    // if (*changes_32 == *negotiatior_32) {
+    //   return prices_array.at(i + 4);
+    // }
+  }
+  return 0;
+}
+
+std::vector<std::array<std::int8_t, 2000>> getChangesTable(
+    const std::vector<std::array<std::uint8_t, 2001>> &prices_table) {
+  std::vector<std::array<std::int8_t, 2000>> changes_table{};
+  for (const auto &prices_array : prices_table) {
+    changes_table.push_back(pricesToPriceChanges(prices_array));
+  }
+  return changes_table;
+}
+
+std::uint64_t findMaxRevenue_v4(
+    const std::vector<std::array<std::uint8_t, 2001>> &prices_table) {
+  auto prices_changes_table = getChangesTable(prices_table);
+  std::uint64_t max_revenue_all_nego{0};
+  std::size_t iter_count{0};
+  std::array<std::int8_t, 4> neg_array{};
+  for (std::int8_t it_0{-9}; it_0 < 10; it_0++) {
+    // nego_array.at(0) = it_1;
+    for (std::int8_t it_1{-9}; it_1 < 10; it_1++) {
+      // nego_array.at(1) = it_2;
+      std::cout << std::format("findMaxRevenue() - Currently at "
+                               "iteration/negotiation array n°{}",
+                               iter_count)
+                << std::endl; // [Debugging]
+      std::cout << std::format("(max revenue currently at {})",
+                               max_revenue_all_nego)
+                << std::endl; // [Debugging]
+      for (std::int8_t it_2{-9}; it_2 < 10; it_2++) {
+        // nego_array.at(2) = it_3;
+        for (std::int8_t it_3{-9}; it_3 < 10; it_3++) {
+          iter_count++;
+          auto max_it = std::max({it_0, it_1, it_2, it_3});
+          auto min_it = std::min({it_0, it_1, it_2, it_3});
+          if ((max_it - min_it) > 9) {
+            continue;
+          }
+          neg_array = {it_0, it_1, it_2, it_3};
+          std::uint64_t revenue_curr_nego{0};
+          for (std::size_t row_idx{0}; row_idx < prices_table.size();
+               row_idx++) {
+            revenue_curr_nego +=
+                tryNegotiation_v4(prices_table[row_idx],
+                                  prices_changes_table[row_idx], neg_array);
+          }
+          if (revenue_curr_nego > max_revenue_all_nego) {
+            max_revenue_all_nego = revenue_curr_nego;
+          }
+        }
+      }
+    }
+  }
+  return max_revenue_all_nego;
+}
+
 int main(int argc, char *argv[]) {
   const std::string le_filename{"../inputs/day_22_input.txt"};
   auto le_lines = fileToLines(le_filename);
@@ -371,6 +456,19 @@ int main(int argc, char *argv[]) {
   // std::endl;
   //
   // v3
+  // auto prices_table = getPricesTable_v3(le_lines);
+  // // for (const auto &row : prices_table) {
+  // //   for (const auto &pr : row) {
+  // //     std::cout << (int)(pr) << ", "; // [Debugging]
+  // //   }
+  // //   std::cout << std::endl; // [Debugging]
+  // // }
+  // std::cout << std::endl; // [Debugging]
+  // auto max_rev = findMaxRevenue_v3(prices_table);
+  // std::cout << std::format("Found max revenue of {} !", max_rev) <<
+  // std::endl;
+  //
+  // v4
   auto prices_table = getPricesTable_v3(le_lines);
   // for (const auto &row : prices_table) {
   //   for (const auto &pr : row) {
@@ -379,7 +477,7 @@ int main(int argc, char *argv[]) {
   //   std::cout << std::endl; // [Debugging]
   // }
   std::cout << std::endl; // [Debugging]
-  auto max_rev = findMaxRevenue_v3(prices_table);
+  auto max_rev = findMaxRevenue_v4(prices_table);
   std::cout << std::format("Found max revenue of {} !", max_rev) << std::endl;
   //
   // auto prices_table = getPricesTable({"1", "2", "3", "2024"});
