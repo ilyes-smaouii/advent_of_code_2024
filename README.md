@@ -181,4 +181,6 @@ approach, with the hope it's fast enough.
 
 ### 2025/10/14
 It seems slow, but I feel like I could wait it out. The issue is, my code finds a price of 0 for every monkey,
-so there's somethings wrong, but I haven't figured out what.
+so there's somethings wrong, but I haven't figured out what.\
+Update : decided to write code that should be more efficient, even though I still haven't figured out what was
+wrong previously. If I'm lucky, the - allegedly - more efficient code might also be correct.
