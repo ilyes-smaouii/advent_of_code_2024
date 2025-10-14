@@ -193,4 +193,4 @@ negotiation arrays)\
 Update : found slightly more efficient code (still very slow, it takes a few minutes to finish).\
 Update : got some rough idea for an even more efficient code.\
 Update : code runs a lot - a looot - faster, but result is now incorrect.\
-Update : figured it out.
+Update : figured it out. Moving on to Day 23.
