@@ -194,3 +194,8 @@ Update : found slightly more efficient code (still very slow, it takes a few min
 Update : got some rough idea for an even more efficient code.\
 Update : code runs a lot - a looot - faster, but result is now incorrect.\
 Update : figured it out. Moving on to Day 23.
+
+### 2025/10/15
+Took my first look at Part 1 of Day 23, and seemed pretty straightforward, so I went straight to
+implementing some ideas, but I didn't get it right right away, so I've gotta dig a little more.
+Assuming I chose the right approach, it shouldn't take much longer, though.
