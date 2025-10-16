@@ -198,4 +198,9 @@ Update : figured it out. Moving on to Day 23.
 ### 2025/10/15
 Took my first look at Part 1 of Day 23, and seemed pretty straightforward, so I went straight to
 implementing some ideas, but I didn't get it right right away, so I've gotta dig a little more.
-Assuming I chose the right approach, it shouldn't take much longer, though.
+Assuming I chose the right approach, it shouldn't take much longer, though.\
+Update : I actually misread/misunderstood the instructions, so it's not as straightforward as I
+thought.\
+
+### 2025/10/16
+Corrected my code for Part 1 of Day 23. Now trying to figure out Part 2.
