@@ -214,3 +214,11 @@ helpers.print_log_entries("Number of groups of three inter-connected"
 # PART 2
 ######
 
+def find_largest_group (starting_dev, conn_dict) :
+  candidates = set()
+  for neighbors in conn_dict[starting_dev] :
+    for neighbor in neighbors :
+      candidates.add(neighbor)
+  # TO-DO : finish this
+  # for []
+  pass
