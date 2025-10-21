@@ -214,11 +214,80 @@ helpers.print_log_entries("Number of groups of three inter-connected"
 # PART 2
 ######
 
-def find_largest_group (starting_dev, conn_dict) :
+def find_largest_group (conn_dict) :
+  """
+  conn_dict key-value pairs should be in this format
+  dev1 : {dev2, dev3, dev4}
+  rather than this :
+  dev1 : [{dev2, dev3}, {dev3, dev4}]
+  """
   candidates = set()
-  for neighbors in conn_dict[starting_dev] :
+  for dev, neighbors in conn_dict.values() :
+    a, b = {dev}, neighbors.copy()
     for neighbor in neighbors :
-      candidates.add(neighbor)
+      connected_to_all = True
+      for a_mem in a :
+        if a_mem not in conn_dict :
+          connected_to_all = False
+          break
+      if connected_to_all :
+        a.add(neighbor)
+        b.discard(neighbor)
   # TO-DO : finish this
   # for []
   pass
+
+rec_count = 0
+
+def find_all_compete_rec (conn_dict, curr_group = set()) :
+  global rec_count
+  next_groups_possible = [curr_group]
+  candidates = set(conn_dict.keys()).difference(curr_group)
+  for candidate in candidates :
+    connected_to_all = True
+    for dev in curr_group :
+      if dev not in conn_dict[candidate] :
+        connected_to_all = False
+        break
+    if connected_to_all :
+      next_groups_possible += find_all_compete_rec(conn_dict, curr_group | {candidate})
+  rec_count += 1
+  if rec_count & ((1 << 14) - 1) == 0 :
+    print("rec_count :", rec_count)
+  return next_groups_possible
+
+# count_dict with only 
+cd2 = {}
+for dev in cd :
+  if dev in g3 :
+    cd2[dev] = cd[dev]
+    for neighbor in cd[dev] :
+      cd2[neighbor] = cd[neighbor]
+
+# find_all_compete_rec(cd2)
+
+def find_next_extension (conn_dict, curr_group = set()) :
+  next_groups = []
+  candidates = set(conn_dict.keys()).difference(curr_group)
+  for candidate in candidates :
+    connected_to_all = (len(curr_group.difference(conn_dict[candidate])) == 0)
+    # for dev in curr_group :
+    #   if dev not in conn_dict[candidate] :
+    #     connected_to_all = False
+    #     break
+    if connected_to_all :
+      next_groups.append(curr_group | {candidate})
+  return next_groups
+
+def find_next_extensions (conn_dict, groups_list = [set()]) :
+  next_groups = []
+  blocking_groups = []
+  for group in groups_list :
+    curr_ext = find_next_extension(conn_dict, group)
+    if len(curr_ext) == 0 :
+      blocking_groups.append(group)
+    else :
+      for ext_group in curr_ext :
+        if ext_group not in next_groups :
+          next_groups.append(ext_group)
+  return {"next" : next_groups, "blocking" : blocking_groups}

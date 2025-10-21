@@ -204,3 +204,8 @@ thought.\
 
 ### 2025/10/16
 Corrected my code for Part 1 of Day 23. Now trying to figure out Part 2.
+
+### 2025/10/21
+Been a little busy lately. I try to go back to Day 23 every now and then to think abouta potential
+solution, but I can't find something that seems good, apart from the naive recursive approach, which
+I feel would probably be too slow. But at this point, I think I'll just give it a try anyway.
