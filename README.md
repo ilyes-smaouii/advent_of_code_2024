@@ -209,3 +209,8 @@ Corrected my code for Part 1 of Day 23. Now trying to figure out Part 2.
 Been a little busy lately. I try to go back to Day 23 every now and then to think abouta potential
 solution, but I can't find something that seems good, apart from the naive recursive approach, which
 I feel would probably be too slow. But at this point, I think I'll just give it a try anyway.
+
+### 2025/10/22
+Update on previous entry : I'm currently running some "naive" code, and it is indeed taking too long.
+As I initially felt, I'll probably need to be smart about the approach I take, if I want my code
+to run in a timely manner.
