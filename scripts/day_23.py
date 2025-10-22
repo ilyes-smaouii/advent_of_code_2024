@@ -214,49 +214,50 @@ helpers.print_log_entries("Number of groups of three inter-connected"
 # PART 2
 ######
 
-def find_largest_group (conn_dict) :
-  """
-  conn_dict key-value pairs should be in this format
-  dev1 : {dev2, dev3, dev4}
-  rather than this :
-  dev1 : [{dev2, dev3}, {dev3, dev4}]
-  """
-  candidates = set()
-  for dev, neighbors in conn_dict.values() :
-    a, b = {dev}, neighbors.copy()
-    for neighbor in neighbors :
-      connected_to_all = True
-      for a_mem in a :
-        if a_mem not in conn_dict :
-          connected_to_all = False
-          break
-      if connected_to_all :
-        a.add(neighbor)
-        b.discard(neighbor)
-  # TO-DO : finish this
-  # for []
-  pass
+# def find_largest_group (conn_dict) :
+#   """
+#   conn_dict key-value pairs should be in this format
+#   dev1 : {dev2, dev3, dev4}
+#   rather than this :
+#   dev1 : [{dev2, dev3}, {dev3, dev4}]
+#   """
+#   candidates = set()
+#   for dev, neighbors in conn_dict.values() :
+#     a, b = {dev}, neighbors.copy()
+#     for neighbor in neighbors :
+#       connected_to_all = True
+#       for a_mem in a :
+#         if a_mem not in conn_dict :
+#           connected_to_all = False
+#           break
+#       if connected_to_all :
+#         a.add(neighbor)
+#         b.discard(neighbor)
+#   # TO-DO : finish this
+#   # for []
+#   pass
 
-rec_count = 0
+# rec_count = 0
 
-def find_all_compete_rec (conn_dict, curr_group = set()) :
-  global rec_count
-  next_groups_possible = [curr_group]
-  candidates = set(conn_dict.keys()).difference(curr_group)
-  for candidate in candidates :
-    connected_to_all = True
-    for dev in curr_group :
-      if dev not in conn_dict[candidate] :
-        connected_to_all = False
-        break
-    if connected_to_all :
-      next_groups_possible += find_all_compete_rec(conn_dict, curr_group | {candidate})
-  rec_count += 1
-  if rec_count & ((1 << 14) - 1) == 0 :
-    print("rec_count :", rec_count)
-  return next_groups_possible
+# def find_all_compete_rec (conn_dict, curr_group = set()) :
+#   global rec_count
+#   next_groups_possible = [curr_group]
+#   candidates = set(conn_dict.keys()).difference(curr_group)
+#   for candidate in candidates :
+#     connected_to_all = True
+#     for dev in curr_group :
+#       if dev not in conn_dict[candidate] :
+#         connected_to_all = False
+#         break
+#     if connected_to_all :
+#       next_groups_possible += find_all_compete_rec(conn_dict, curr_group | {candidate})
+#   rec_count += 1
+#   if rec_count & ((1 << 14) - 1) == 0 :
+#     print("rec_count :", rec_count)
+#   return next_groups_possible
 
-# count_dict with only 
+# count_dict with only devices that have already been shown to be in interconnected
+# groups of at least size 3
 cd2 = {}
 for dev in cd :
   if dev in g3 :
@@ -266,28 +267,110 @@ for dev in cd :
 
 # find_all_compete_rec(cd2)
 
-def find_next_extension (conn_dict, curr_group = set()) :
-  next_groups = []
-  candidates = set(conn_dict.keys()).difference(curr_group)
+# def find_next_extension (conn_dict, curr_group = set()) :
+#   next_groups = []
+#   candidates = set(conn_dict.keys()).difference(curr_group)
+#   for candidate in candidates :
+#     connected_to_all = (len(curr_group.difference(conn_dict[candidate])) == 0)
+#     # for dev in curr_group :
+#     #   if dev not in conn_dict[candidate] :
+#     #     connected_to_all = False
+#     #     break
+#     if connected_to_all :
+#       next_groups.append(curr_group | {candidate})
+#   return next_groups
+
+# def find_next_extensions (conn_dict, groups_list = [set()]) :
+#   next_groups = []
+#   blocking_groups = []
+#   for group in groups_list :
+#     curr_ext = find_next_extension(conn_dict, group)
+#     if len(curr_ext) == 0 :
+#       blocking_groups.append(group)
+#     else :
+#       for extension_group in curr_ext :
+#         if extension_group not in next_groups :
+#           next_groups.append(extension_group)
+#   return {"next" : next_groups, "blocking" : blocking_groups}
+
+class HashableGroup() :
+  def __init__(self, group = set()):
+    self._g = group
+  def __hash__(self) :
+    return hash(tuple(sorted(list(self._g))))
+  def __eq__(self, other):
+    return self._g == other._g
+  def add(self, elem) :
+    self._g.add(elem)
+  def as_set(self) :
+    return self._g
+  def to_str(self) :
+    return ",".join([str(e) for e in tuple(sorted(list(self._g)))])
+  def union(self, other) :
+    if type(other) == set :
+      return HashableGroup(self._g.union(other))
+    elif type(other) == HashableGroup :
+      return HashableGroup(self._g.union(other._g))
+    else :
+      raise RuntimeError("HashableGroup::union() error : bad argument !")
+  #
+
+def find_next_extension_v2 (conn_dict, curr_group = HashableGroup()) :
+  next_groups = set()
+  candidates = set(conn_dict.keys()).difference(curr_group.as_set())
   for candidate in candidates :
-    connected_to_all = (len(curr_group.difference(conn_dict[candidate])) == 0)
+    connected_to_all = (len(curr_group.as_set().difference(conn_dict[candidate])) == 0)
     # for dev in curr_group :
     #   if dev not in conn_dict[candidate] :
     #     connected_to_all = False
     #     break
     if connected_to_all :
-      next_groups.append(curr_group | {candidate})
+      next_groups.add(curr_group.union({candidate}))
   return next_groups
 
-def find_next_extensions (conn_dict, groups_list = [set()]) :
-  next_groups = []
-  blocking_groups = []
-  for group in groups_list :
-    curr_ext = find_next_extension(conn_dict, group)
+def find_next_extensions_v2 (conn_dict, groups_set = {HashableGroup()}) :
+  next_groups = set()
+  blocking_groups = set()
+  for group in groups_set :
+    curr_ext = find_next_extension_v2(conn_dict, group)
     if len(curr_ext) == 0 :
-      blocking_groups.append(group)
+      blocking_groups.add(group)
     else :
-      for ext_group in curr_ext :
-        if ext_group not in next_groups :
-          next_groups.append(ext_group)
+      for extension_group in curr_ext :
+        if type(extension_group) == HashableGroup :
+          next_groups.add(extension_group)
+        else :
+          raise RuntimeError("find_next_extension() error : bad type !")
   return {"next" : next_groups, "blocking" : blocking_groups}
+
+def find_largest_group_v2(conn_dict) :
+  n_and_b = {"next" : {HashableGroup()}, "blocking" : set()}
+  n_and_b = find_next_extensions_v2(conn_dict, n_and_b["next"])
+  iter_count = 0
+  while (len(n_and_b["next"]) > 1) :
+    n_and_b = find_next_extensions_v2(conn_dict, n_and_b["next"])
+    helpers.print_log_entries("find_largest_group_v2() - iter_count"
+                              " : {}".format(iter_count), log_cats = {"I"})
+    helpers.print_log_entries("find_largest_group_v2() - next length"
+                              " : {}".format(len(n_and_b["next"])), log_cats = {"I"})
+    iter_count += 1
+  if (len(n_and_b["next"]) > 0) :
+    largest_group = next(iter(n_and_b["next"]))
+    if type(largest_group) == HashableGroup :
+      return largest_group
+    else :
+      raise RuntimeError("find_largest_group_v2() error : should have HashableGroup !")
+  else :
+    raise RuntimeError("find_largest_group_v2() error : should have found"
+                       "a single solution candidate !")
+  #
+
+# whether I use cd or cd2 doesn't seem to make much of a difference, which
+# I guess makes sense, as a set has O(1) access complexity on average
+
+# le_largest_group = find_largest_group_v2(cd2)
+le_largest_group = find_largest_group_v2(cd)
+
+helpers.print_log_entries("Largest interconnected group :", le_largest_group.to_str(),
+                          "(group of length {})".format(len(le_largest_group.as_set())),
+                          log_cats={"R"})

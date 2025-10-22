@@ -213,4 +213,11 @@ I feel would probably be too slow. But at this point, I think I'll just give it 
 ### 2025/10/22
 Update on previous entry : I'm currently running some "naive" code, and it is indeed taking too long.
 As I initially felt, I'll probably need to be smart about the approach I take, if I want my code
-to run in a timely manner.
+to run in a timely manner.\
+Update : nevermind, I took inspiration from some earlier Day, and by turning a `list` into a `set`,
+the whole thing was a lot faster. Still somewhat slow, but fast enough for me to get a result, and
+get my next gold star. I had to create a `HashableGroup` class for that, so I could create a
+custom hash for my groups (i.e. sets of `string`'s).\
+Update : tried running it all at once, which really highlighted how slow it still was. I could
+probably try to figure out a better way to do this, but I've already found the solution,
+and I'd rather just move on to the next Day.
