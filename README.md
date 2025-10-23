@@ -221,3 +221,11 @@ custom hash for my groups (i.e. sets of `string`'s).\
 Update : tried running it all at once, which really highlighted how slow it still was. I could
 probably try to figure out a better way to do this, but I've already found the solution,
 and I'd rather just move on to the next Day.
+
+### 2025/10/23
+After putting it off for about a day, I read instructions for Part 1 of Day 24, and it actually looks
+pretty straightforward, so I might just try it straight away.\
+Update : yeah I got it. Moving on to Part 2, and praying this one doesn't just torture my mind for
+several days.\
+Update : just read the instructions for Part 2 of Day 24. Sounds really interesting, on a first read.
+Hopefully, I can find some simple and elegant solution to this, and it doesn't take me too long.
