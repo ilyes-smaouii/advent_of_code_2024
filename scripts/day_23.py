@@ -207,7 +207,7 @@ g3c = count_groups_of_3_with_t_v2(tc)
 it = iter(tc)
 
 helpers.print_log_entries("Number of groups of three inter-connected"
-                          "computers with at least one potential Chief Historian :"
+                          " computers with at least one potential Chief Historian :"
                           , g3c, log_cats = {"R"})
 
 ######

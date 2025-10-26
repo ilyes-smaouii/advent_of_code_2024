@@ -63,11 +63,16 @@ le_input_node_raw, le_gate_connections_raw = le_file_content.split("\n\n")
 le_initial_inputs_str = helpers.raw_to_lines(le_input_node_raw)
 le_gate_connections_str = helpers.raw_to_lines(le_gate_connections_raw)
 
+max_bit_pos = 0
+
 
 def parse_initial_inputs_str(input_nodes_str):
+  global max_bit_pos
   initial_inputs = dict()
   for line in input_nodes_str:
     key, val_str = line.split(": ")
+    bit_pos = int(key[1:])
+    max_bit_pos = max(max_bit_pos, bit_pos)
     initial_inputs[key] = int(val_str)
   return initial_inputs
 
@@ -117,3 +122,225 @@ def get_decimal(processed_nodes):
       n = int(node[1:])
       res += int(value) << n
   return res
+
+
+le_processed_nodes = simulate_logic(le_input_nodes, le_gate_connections)
+le_decimal = get_decimal(le_processed_nodes)
+
+helpers.set_log_by_parts()
+
+helpers.print_log_entries(
+  "Resulting decimal :", le_decimal, log_cats={"R", "P1"})
+
+######
+# PART 2
+######
+
+
+def get_wire_name(prefix, n):
+  if n < 0:
+    raise RuntimeError("get_input_name() error : n should be >= 0 !")
+  if n < 10:
+    return prefix + "0" + str(n)
+  elif n < 99:
+    return prefix + str(n)
+  else:
+    raise RuntimeError("get_input_name() error : n > 99 !")
+
+
+def generate_zeroed_input(max):
+  input_nodes = dict()
+  for j in range(max):
+    x_input_name = get_wire_name("x", j)
+    y_input_name = get_wire_name("y", j)
+    input_nodes[x_input_name] = 0
+    input_nodes[y_input_name] = 0
+  return input_nodes
+
+
+def fuzzing_test_v1(input_type, gate_connections, max_input_nbr=45):
+  bad_inputs = set()
+  for i in range(max_input_nbr):
+    bad_input_name = get_wire_name(input_type, i)
+    z_output_name = get_wire_name("z", i)
+    input_nodes = generate_zeroed_input(max_input_nbr)
+    input_nodes[bad_input_name] = 1
+    curr_test_nodes = simulate_logic(input_nodes, gate_connections)
+    if curr_test_nodes[z_output_name] != 1:
+      bad_inputs.add(i)
+  return bad_inputs
+
+
+# def fuzzing_test_v2(input_type, gate_connections, max_input_nbr=45):
+#   bad_inputs = set()
+#   for i in range(max_input_nbr):
+#     z_output_name = get_wire_name("z", i + 1)
+#     x_bad_input_name = get_wire_name("x", i)
+#     y_bad_input_name = get_wire_name("y", i)
+#     input_nodes = generate_zeroed_input(max_input_nbr)
+#     input_nodes[x_bad_input_name] = 1
+#     input_nodes[y_bad_input_name] = 1
+#     curr_test_nodes = simulate_logic(input_nodes, gate_connections)
+#     if curr_test_nodes[z_output_name] != 1:
+#       bad_inputs.add(i)
+#   return bad_inputs
+
+
+def fuzzing_test_v3(gate_connections, max_input_nbr=45):
+  bad_inputs = set()
+  for i in range(max_input_nbr - 1):
+    z_output_name = get_wire_name("z", i + 2)
+    x_bad_input_name = get_wire_name("x", i)
+    x_bad_input_name_2 = get_wire_name("x", i + 1)
+    y_bad_input_name = get_wire_name("y", i)
+    input_nodes = generate_zeroed_input(max_input_nbr)
+    input_nodes[x_bad_input_name] = 1
+    input_nodes[y_bad_input_name] = 1
+    input_nodes[x_bad_input_name_2] = 1
+    curr_test_nodes = simulate_logic(input_nodes, gate_connections)
+    if curr_test_nodes[z_output_name] != 1:
+      bad_inputs.add(i)
+  return bad_inputs
+
+
+le_x_candidates_v1 = fuzzing_test_v1("x", le_gate_connections, 45)
+le_xy_candidates_v3 = fuzzing_test_v3(le_gate_connections, 45)
+le_candidates = le_x_candidates_v1 | le_xy_candidates_v3
+
+helpers.print_log_entries("[Approach 1] Candidates :",
+                          le_candidates, log_cats={"I", "P1"})
+
+# Structure of logic gates :
+# X_N XOR Y_N --> r_n
+# X_N AND Y_N --> a_n
+# CARRY_(N-1) XOR r_n --> z_n
+# CARRY_(N-1) AND r_n --> b_n
+# a_n OR b_n --> carry_n
+
+# INPUTS : X, Y, AA[-1], CARRY[-1]
+# OUTPUTS : R, Z, AA
+
+
+def find_miscategorized_outputs(gate_connections):
+  """
+  Assuming the following gate connections exist - and only them - for each
+  bit, with maybe the exception of the 0-th bit :
+  x_n XOR y_n --> r_n
+  x_n AND y_n --> a_n
+  carry_(n-1) XOR r_n --> z_n
+  carry_(n-1) AND r_n --> b_n
+  a_n OR b_n --> carry_n
+
+  (actual names for variables of types x/y/z is different in input, this is only
+  a representation, and the underscore is also not present in the problem input)
+  """
+
+  # format for `possibilties` :
+  # {cat : (XOR_count, AND_count, OR_count)}
+  # With cat in ("r", "a", "z", "b", "c") and the count's counting how many times
+  # a variable of each category is supposed to be used as an operand with the
+  # corresponding operator
+  out_possibilities = {
+      "r": (1, 1, 0),
+      "a": (0, 0, 1),
+      "z": (0, 0, 0),
+      "b": (0, 0, 1),
+      "c": (1, 1, 0),
+  }
+  miscategorized = set()
+  involvements = dict()
+  # First, fill dictionary with zeroed-out values
+  for output, (oper, op_a, op_b) in gate_connections.items():
+    if {op_a, op_b} == {"x00", "y00"}:
+      if (output, oper) == ("z00", "XOR"):
+        involvements[output] = {
+            "name": "z00",
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+      elif oper == "AND":
+        involvements[output] = {
+            "name": "c00",
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+      else:
+        raise RuntimeWarning(
+            "find_involvements() error : unknown case encountered !"
+          )
+    elif op_a[0] in ("x", "y"):
+      bit_pos = int(op_a[1:])
+      if oper == "XOR":
+        involvements[output] = {
+            "name": get_wire_name("r", bit_pos),
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+      elif oper == "AND":
+        involvements[output] = {
+            "name": get_wire_name("a", bit_pos),
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+    else:
+      if oper == "XOR":
+        involvements[output] = {
+            "name": "z?",
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+      elif oper == "AND":
+        involvements[output] = {
+            "name": "b?",
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+      elif oper == "OR":
+        involvements[output] = {
+            "name": "c?",
+            "XOR": 0,
+            "AND": 0,
+            "OR": 0,
+        }
+  #
+  # Now, update dictionary
+  for output, (oper, op_a, op_b) in gate_connections.items():
+    # 5 cases (c.f. above)
+    if op_a[0] in ("x", "y"):
+      pass
+    else:
+      involvements[op_a][oper] += 1
+      involvements[op_b][oper] += 1
+  #
+  # Finally, check produced dictionary
+  for output, val in involvements.items():
+    name, x_c, a_c, o_c = val["name"], val["XOR"], val["AND"], val["OR"]
+    cat = name[0]
+    if out_possibilities[cat] != (x_c, a_c, o_c):
+      miscategorized.add((output, name))
+    else:
+      helpers.print_log_entries(
+        "Good (out, val) pair : ({}, {})".format(output, val), log_cats={"D"})
+  return miscategorized
+
+
+# helpers.LOG_DICT["D"][0] = True
+
+le_mis = find_miscategorized_outputs(le_gate_connections)
+le_mis = {e for e in le_mis if e[0] != get_wire_name("z", max_bit_pos + 1)}
+
+if len(le_mis) != 8:
+  raise RuntimeWarning(
+    "Warning : couldn't find all swapped wires in miscategorized wires !"
+    "\n(i.e. some wires were swapped with other wires of the same categories)")
+
+helpers.print_log_entries(
+  "[Approach 2] Miscategorized outputs :", le_mis, log_cats={"R", "P2"})
+helpers.print_log_entries("[PART 2 - Approach 2] Resulting string :", ",".join(
+  sorted([e[0] for e in le_mis])), log_cats={"R", "P2"})

@@ -229,3 +229,32 @@ Update : yeah I got it. Moving on to Part 2, and praying this one doesn't just t
 several days.\
 Update : just read the instructions for Part 2 of Day 24. Sounds really interesting, on a first read.
 Hopefully, I can find some simple and elegant solution to this, and it doesn't take me too long.
+
+### 2025/10/24
+Update on Day 23 : I went on Reddit to see what other people did, and apparently, while they had a
+similar approach to mine, it could be a lot more efficient/faster. Might decide to come back to
+this later to try to improve it, idk.
+
+### 2025/10/25
+Back to Day 24. I went back to physical paper to draft my thoughts and ideas, and I think I found
+the proper way to do this. An idea I had was to try to rename the wires/outputs according to
+the gates they were involved in, to try to make everything clearer (e.g. c_n for the n-th "carry"
+wire)
+The main issue was that, while an output can't be swapped more than
+once, the other gates it's involved can still be changed, which could make identifying it a lot
+more complex.
+The thing, though, is that only outputs are swapped. So, assuming my input always contains
+the same standard gate connections (i.e. two ANDs, two XORs and one OR for each of the 50 outputs,
+apart from maybe the ones involving `x00`, `y00` and `z00`), I can use that to check that each
+output is correctly "categorized".\
+One issue though : this only allows to detect swaps between wires of different categories, like
+a "carry" wire and a "z" wire.
+Update : tried it, and I found 8 wires, and got the solution. In theory though, this doesn't
+guarantee a solution, as two wires of the "category" could be swapped, and not be detected with
+this approach. Not sure if the fact that it still worked was pure luck or if it was a conscious
+choice by the AoC team, but I'll take that as a win for now. For the sake of completeness, I've
+also left the code my first approach, which was gonna use fuzzing. In combination with the second
+approach, as well as some manual digging, this should work on any problem input.\
+Unfortunately, I didn't figure out how to do it all automatically and still account for all
+possible cases, and I don't feel like spending that much more time on it, so I think I'm just
+moving on to Day 25.
