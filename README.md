@@ -258,4 +258,14 @@ also left the code my first approach, which was gonna use fuzzing. In combinatio
 approach, as well as some manual digging, this should work on any problem input.\
 Unfortunately, I didn't figure out how to do it all automatically and still account for all
 possible cases, and I don't feel like spending that much more time on it, so I think I'm just
-moving on to Day 25.
+moving on to Day 25.\
+Update : Part 1 of Day 25 was pretty easy.\
+Update : Just moved on to Part 2, and apparently that's it ??! What an incredible gift from the
+team (guy ?) at AoC ! I guess this was his Christmas gift to the people who did this, as it was
+meant to be completed on the 25th of December 2024.\
+Anyway, I think I can leave this behind me now and devote more time to other stuff. If I can, I
+might try to participate to the 2025 edition in real time.
+<br>
+<br>
+
+**Advent of Code 2024 : finished !!!!!**
