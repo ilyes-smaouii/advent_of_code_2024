@@ -4,10 +4,10 @@ import copy
 # Helper stuff
 
 LOG_DICT = {
-  "D": [False, "[DEBUG]"],
-  "T": [False, "[TESTING]"],
-  "I": [True, "[INFO]"],
-  "R": [True, "[RESULTS]"],
+  "D": [False, "DEBUG"],
+  "T": [False, "TESTING"],
+  "I": [True, "INFO"],
+  "R": [True, "RESULTS"],
 }
 
 
@@ -82,10 +82,11 @@ def get_log_entries(*to_print, log_cats={"I"}):
   for log_cat in log_cats:
     if log_cat in LOG_DICT and LOG_DICT[log_cat][0]:
       should_log = True
-      if len(LOG_DICT[log_cat]) > 1:
-        prefix += LOG_DICT[log_cat][1]
-      else:
-        prefix += "[" + str(log_cat) + "]"
+      # if len(LOG_DICT[log_cat]) > 1:
+      #   prefix += LOG_DICT[log_cat][1]
+      # else:
+      # prefix += "[" + str(log_cat) + "]"
+      prefix += "[" + LOG_DICT[log_cat][1] + "]"
   # print("get_log_entries() - to_print : ", to_print) # [debugging]
   if should_log:
     return [prefix + " " + str(_str) for _str in to_print]
@@ -115,6 +116,11 @@ def check_table_type_and_size(table):
     if len(table[row_idx]) != col_count:
       return (False, "Bad len on table[" + str(row_idx) + "]")
   return (True, "All good")
+
+
+def set_log_by_parts():
+  LOG_DICT["P1"] = [True, "PART 1"]
+  LOG_DICT["P2"] = [True, "PART 2"]
 
 
 class SimpleTableView():
