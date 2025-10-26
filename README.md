@@ -239,10 +239,11 @@ this later to try to improve it, idk.
 Back to Day 24. I went back to physical paper to draft my thoughts and ideas, and I think I found
 the proper way to do this. An idea I had was to try to rename the wires/outputs according to
 the gates they were involved in, to try to make everything clearer (e.g. c_n for the n-th "carry"
-wire)
-The main issue was that, while an output can't be swapped more than
+wire). The main issue was that, while an output can't be swapped more than
 once, the other gates it's involved can still be changed, which could make identifying it a lot
 more complex.
+
+### 2025/10/26
 The thing, though, is that only outputs are swapped. So, assuming my input always contains
 the same standard gate connections (i.e. two ANDs, two XORs and one OR for each of the 50 outputs,
 apart from maybe the ones involving `x00`, `y00` and `z00`), I can use that to check that each
