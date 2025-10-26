@@ -63,58 +63,57 @@ le_input_node_raw, le_gate_connections_raw = le_file_content.split("\n\n")
 le_initial_inputs_str = helpers.raw_to_lines(le_input_node_raw)
 le_gate_connections_str = helpers.raw_to_lines(le_gate_connections_raw)
 
-def parse_initial_inputs_str (input_nodes_str) :
+
+def parse_initial_inputs_str(input_nodes_str):
   initial_inputs = dict()
-  for line in input_nodes_str :
+  for line in input_nodes_str:
     key, val_str = line.split(": ")
     initial_inputs[key] = int(val_str)
   return initial_inputs
 
-def parse_gate_connections_str (gate_connections_str) :
+
+def parse_gate_connections_str(gate_connections_str):
   gate_connections = dict()
-  for line in gate_connections_str :
+  for line in gate_connections_str:
     inputs, output = line.split(" -> ")
     operand_a, operator, operand_b = inputs.split(" ")
     gate_connections[output] = (operator, operand_a, operand_b)
   return gate_connections
 
+
 le_input_nodes = parse_initial_inputs_str(le_initial_inputs_str)
 le_gate_connections = parse_gate_connections_str(le_gate_connections_str)
 
-def simulate_logic (input_nodes, gate_connections) :
-  if type(input_nodes) != dict or type(gate_connections) != dict :
+
+def simulate_logic(input_nodes, gate_connections):
+  if type(input_nodes) != dict or type(gate_connections) != dict:
     raise RuntimeError("simulate_logic() error : bad arguments !")
   unprocessed_nodes = set(gate_connections.keys())
   processed_nodes = input_nodes.copy()
-  while len(unprocessed_nodes) > 0 :
-    for out in unprocessed_nodes.copy() :
+  while len(unprocessed_nodes) > 0:
+    for out in unprocessed_nodes.copy():
       oper, op_a_key, op_b_key = gate_connections[out]
-      if op_a_key in processed_nodes and op_b_key in processed_nodes :
+      if op_a_key in processed_nodes and op_b_key in processed_nodes:
         op_a = processed_nodes[op_a_key]
         op_b = processed_nodes[op_b_key]
-        if oper == "AND" :
-          processed_nodes[out] = (op_a & op_b)
-        elif oper == "OR" :
-          processed_nodes[out] = (op_a | op_b)
-        elif oper == "XOR" :
-          processed_nodes[out] = (op_a ^ op_b)
-        else :
-          raise RuntimeError("simulate_logic() error : bad operator ! ({})".format(oper))
+        if oper == "AND":
+          processed_nodes[out] = op_a & op_b
+        elif oper == "OR":
+          processed_nodes[out] = op_a | op_b
+        elif oper == "XOR":
+          processed_nodes[out] = op_a ^ op_b
+        else:
+          raise RuntimeError(
+              "simulate_logic() error : bad operator ! ({})".format(oper)
+          )
         unprocessed_nodes.discard(out)
   return processed_nodes
 
-def get_decimal (processed_nodes) :
+
+def get_decimal(processed_nodes):
   res = 0
-  for node, value in processed_nodes.items() :
-    if node[0] == 'z' :
+  for node, value in processed_nodes.items():
+    if node[0] == "z":
       n = int(node[1:])
-      res += (int(value) << n)
+      res += int(value) << n
   return res
-
-le_processed_nodes = simulate_logic(le_input_nodes, le_gate_connections)
-le_decimal = get_decimal(le_processed_nodes)
-
-######
-# PART 2
-######
-
